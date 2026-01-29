@@ -1,0 +1,10 @@
+{
+  "name": "request-report-telegram",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "formidable": "^3.5.1",
+    "moment-timezone": "^0.5.37",
+    "node-telegram-bot-api": "^0.66.0"
+  }
+}
