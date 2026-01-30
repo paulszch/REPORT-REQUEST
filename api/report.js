@@ -9,7 +9,7 @@ export const config = {
 
 const bot = new TelegramBot(process.env.BOT_TOKEN)
 const OWNER_ID = process.env.OWNER_ID
-const TIMEZONE = process.env.TIMEZONE || 'Asia/Jakarta'
+const TIMEZONE = 'Asia/Jakarta'
 
 export default function handler(req, res) {
   if (req.method !== 'POST') {
