@@ -13,76 +13,89 @@ const TIMEZONE = 'Asia/Jakarta'
 
 export default function handler(req, res) {
   if (req.method !== 'POST') {
+    res.setHeader('Allow', ['POST'])
     return res.status(405).json({ message: 'Method Not Allowed' })
   }
 
-  const form = formidable({ multiples: false })
+  const form = formidable({ 
+    multiples: false,
+    maxFileSize: 50 * 1024 * 1024, // 50MB limit
+    keepExtensions: true
+  })
 
   form.parse(req, async (err, fields, files) => {
     if (err) {
-      console.error(err)
-      return res.status(500).json({ message: 'Parse error' })
+      console.error('Form parse error:', err)
+      return res.status(500).json({ 
+        status: false,
+        message: 'Gagal memproses form data' 
+      })
     }
 
-    // ✅ FIX FIELD (ARRAY → STRING)
-    const type = fields.type?.[0] || 'Request'
-    const name = fields.name?.[0] || '-'
-    const userid = fields.userid?.[0] || '-'
-    const message = fields.message?.[0] || '-'
+    try {
+      // ✅ PERBAIKAN: Ambil nilai dari fields dengan benar
+      const type = Array.isArray(fields.type) ? fields.type[0] : fields.type || 'Request'
+      const name = Array.isArray(fields.name) ? fields.name[0] : fields.name || '-'
+      const userid = Array.isArray(fields.userid) ? fields.userid[0] : fields.userid || '-'
+      const message = Array.isArray(fields.message) ? fields.message[0] : fields.message || '-'
 
-    // ✅ FIX FILE (ARRAY SAFE)
-    const uploadedFile = files.file
-      ? Array.isArray(files.file)
-        ? files.file[0]
-        : files.file
-      : null
+      // ✅ PERBAIKAN: Handle file lebih aman
+      let uploadedFile = null
+      if (files.file) {
+        if (Array.isArray(files.file)) {
+          uploadedFile = files.file[0]
+        } else {
+          uploadedFile = files.file
+        }
+      }
 
-    const time = moment()
-      .tz(TIMEZONE)
-      .format('DD MMM YYYY • HH:mm:ss z')
+      const time = moment()
+        .tz(TIMEZONE)
+        .format('DD MMM YYYY • HH:mm:ss z')
 
-    const caption =
-`📩 ${type.toUpperCase()} BARU
+      const caption = `📩 ${type.toUpperCase()} BARU
 
 👤 Nama : ${name}
 🆔 ID   : ${userid}
 🕒 Waktu: ${time}
 
 💬 Pesan:
-${message}
-`
+${message}`
 
-    try {
-      if (uploadedFile?.filepath) {
+      if (uploadedFile?.filepath && fs.existsSync(uploadedFile.filepath)) {
         const buffer = fs.readFileSync(uploadedFile.filepath)
         const mime = uploadedFile.mimetype || ''
+        const filename = uploadedFile.originalFilename || 'file'
 
-        if (mime.startsWith('image')) {
-          await bot.sendPhoto(OWNER_ID, buffer, { caption })
+        // Hapus file temp setelah digunakan
+        setTimeout(() => {
+          fs.unlink(uploadedFile.filepath, () => {})
+        }, 3000)
 
-        } else if (mime.startsWith('video')) {
-          await bot.sendVideo(
-            OWNER_ID,
-            {
-              source: buffer,
-              filename: uploadedFile.originalFilename || 'video.mp4'
-            },
-            { caption }
-          )
+        if (mime.startsWith('image/')) {
+          await bot.sendPhoto(OWNER_ID, buffer, { 
+            caption,
+            parse_mode: 'HTML'
+          })
+
+        } else if (mime.startsWith('video/')) {
+          await bot.sendVideo(OWNER_ID, buffer, { 
+            caption,
+            supports_streaming: true, // ✅ PERBAIKAN: Tambahkan ini untuk video streaming
+            filename,
+            parse_mode: 'HTML'
+          })
 
         } else {
-          await bot.sendDocument(
-            OWNER_ID,
-            {
-              source: buffer,
-              filename: uploadedFile.originalFilename || 'file'
-            },
-            { caption }
-          )
+          await bot.sendDocument(OWNER_ID, buffer, { 
+            caption,
+            filename,
+            parse_mode: 'HTML'
+          })
         }
 
       } else {
-        await bot.sendMessage(OWNER_ID, caption)
+        await bot.sendMessage(OWNER_ID, caption, { parse_mode: 'HTML' })
       }
 
       return res.status(200).json({
@@ -90,12 +103,12 @@ ${message}
         message: 'Pesan berhasil dikirim ke owner'
       })
 
-    } catch (e) {
-      console.error('Telegram error:', e)
+    } catch (error) {
+      console.error('Telegram error:', error)
       return res.status(500).json({
         status: false,
-        message: 'Gagal mengirim ke Telegram'
+        message: 'Gagal mengirim ke Telegram: ' + error.message
       })
     }
   })
-}
+      }
