@@ -19,6 +19,7 @@
       align-items: center;
       justify-content: center;
       color: #fff;
+      padding: 20px;
     }
 
     .card {
@@ -61,6 +62,11 @@
       border-radius: 10px;
       margin-bottom: 14px;
       outline: none;
+      transition: border-color 0.3s;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      border-color: #22c55e;
     }
 
     textarea {
@@ -76,15 +82,18 @@
       cursor: pointer;
       color: #94a3b8;
       margin-bottom: 12px;
+      transition: all 0.3s;
     }
 
     .file-box:hover {
       background: rgba(255,255,255,0.03);
+      border-color: #22c55e;
     }
 
     .preview {
       margin-top: 10px;
       display: none;
+      position: relative;
     }
 
     .preview img,
@@ -92,7 +101,22 @@
       width: 100%;
       border-radius: 10px;
       max-height: 240px;
-      object-fit: cover;
+      object-fit: contain;
+      background: #020617;
+    }
+
+    .remove-preview {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      z-index: 10;
     }
 
     button {
@@ -104,7 +128,7 @@
       cursor: pointer;
       background: linear-gradient(135deg, #22c55e, #16a34a);
       color: #022c22;
-      transition: transform .1s ease;
+      transition: transform .1s ease, opacity 0.3s;
     }
 
     button:active {
@@ -115,6 +139,22 @@
       background: #334155;
       color: #94a3b8;
       cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .status {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 14px;
+      min-height: 20px;
+    }
+
+    .success {
+      color: #22c55e;
+    }
+
+    .error {
+      color: #ef4444;
     }
   </style>
 </head>
@@ -138,6 +178,7 @@
     name="name"
     placeholder="Nama kamu"
     required
+    autocomplete="name"
   >
 
   <label>ID</label>
@@ -147,6 +188,7 @@
     name="userid"
     placeholder="ID akun / user"
     required
+    autocomplete="username"
   >
 
   <label>Pesan</label>
@@ -159,7 +201,9 @@
 
   <label>File (opsional)</label>
   <div class="file-box" onclick="document.getElementById('fileInput').click()">
-    Klik untuk upload gambar / video
+    <span id="fileLabel">Klik untuk upload gambar / video</span>
+    <br>
+    <small>Maksimal 50MB</small>
   </div>
 
   <input
@@ -171,6 +215,8 @@
   >
 
   <div class="preview" id="preview"></div>
+
+  <div class="status" id="status"></div>
 
   <button type="submit" id="send">Kirim</button>
 
