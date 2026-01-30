@@ -120,35 +120,61 @@
 </head>
 <body>
 
-<div class="card">
+<form class="card" id="reportForm" enctype="multipart/form-data">
+
   <h1>Request / Report</h1>
   <div class="subtitle">Kirim masukan langsung ke owner</div>
 
   <label>Jenis</label>
-  <select id="type">
+  <select id="type" name="type">
     <option value="Request">Request</option>
     <option value="Report">Report</option>
   </select>
 
   <label>Nama</label>
-  <input type="text" id="name" placeholder="Nama kamu">
+  <input
+    type="text"
+    id="name"
+    name="name"
+    placeholder="Nama kamu"
+    required
+  >
 
   <label>ID</label>
-  <input type="text" id="userid" placeholder="ID akun / user">
+  <input
+    type="text"
+    id="userid"
+    name="userid"
+    placeholder="ID akun / user"
+    required
+  >
 
   <label>Pesan</label>
-  <textarea id="message" placeholder="Tulis pesan kamu di sini..."></textarea>
+  <textarea
+    id="message"
+    name="message"
+    placeholder="Tulis pesan kamu di sini..."
+    required
+  ></textarea>
 
   <label>File (opsional)</label>
-  <div class="file-box" onclick="fileInput.click()">
+  <div class="file-box" onclick="document.getElementById('fileInput').click()">
     Klik untuk upload gambar / video
   </div>
-  <input type="file" id="fileInput" accept="image/*,video/*" hidden>
+
+  <input
+    type="file"
+    id="fileInput"
+    name="file"
+    accept="image/*,video/*"
+    hidden
+  >
 
   <div class="preview" id="preview"></div>
 
-  <button id="send">Kirim</button>
-</div>
+  <button type="submit" id="send">Kirim</button>
+
+</form>
 
 <script src="script.js"></script>
 </body>
