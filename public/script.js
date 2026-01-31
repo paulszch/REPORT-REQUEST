@@ -12,7 +12,7 @@ const alertMessage = document.getElementById('alertMessage')
 const alertButtons = document.getElementById('alertButtons')
 
 function showAlert(options) {
-  const {type = 'info', title = 'INFO', message = '', icon = '', confirmText = 'OK', cancelText = 'CANCEL', onConfirm = () => {}, onCancel = () => {}} = options
+  const {type = 'info', title = 'INFO', message = '', icon = 'ℹ️', confirmText = 'OK', cancelText = 'CANCEL', onConfirm = () => {}, onCancel = () => {}} = options
   const icons = {info: 'ℹ️', success: '✅', warning: '⚠️', error: '❌', confirm: '❓'}
   alertIcon.textContent = icon || icons[type] || icons.info
   alertTitle.textContent = title.toUpperCase()
@@ -78,10 +78,17 @@ navItems.forEach(item => {
 })
 
 function checkHistoryAuth() {
-  document.getElementById('passwordModal').style.display = 'block'
-  document.getElementById('filterSection').style.display = 'none'
-  document.getElementById('historyContainer').style.display = 'none'
-  document.getElementById('logoutBtn').style.display = 'none'
+  const modal = document.getElementById('passwordModal')
+  const filter = document.getElementById('filterSection')
+  const container = document.getElementById('historyContainer')
+  const logoutBtn = document.getElementById('logoutBtn')
+
+  modal.style.display = 'block'
+  modal.style.visibility = 'visible'
+  modal.style.opacity = '1'
+  filter.style.display = 'none'
+  container.style.display = 'none'
+  if (logoutBtn) logoutBtn.style.display = 'none'
   document.getElementById('historyPassword').focus()
 }
 
@@ -106,22 +113,31 @@ document.getElementById('submitPassword')?.addEventListener('click', async () =>
     if (data.success) {
       errorEl.textContent = '✓ ACCESS GRANTED!'
       errorEl.style.color = '#86efac'
-      document.getElementById('passwordModal').style.display = 'none'
+      
+      const modal = document.getElementById('passwordModal')
+      modal.style.display = 'none'
+      modal.style.visibility = 'hidden'
+      modal.style.opacity = '0'
+      modal.style.height = '0'
+      modal.style.padding = '0'
+      modal.style.margin = '0'
+      modal.style.overflow = 'hidden'
+
       document.getElementById('filterSection').style.display = 'block'
       document.getElementById('historyContainer').style.display = 'block'
       document.getElementById('logoutBtn').style.display = 'block'
+      
       await loadHistory()
-      setTimeout(() => {
-        btn.disabled = false
-        btn.innerHTML = '<span class="blink">▸</span> UNLOCK <span class="blink">◂</span>'
-      }, 300)
+      
+      btn.disabled = false
+      btn.innerHTML = '<span class="blink">▸</span> UNLOCK <span class="blink">◂</span>'
     } else {
       errorEl.textContent = '❌ WRONG PASSWORD!'
       btn.disabled = false
       btn.innerHTML = '<span class="blink">▸</span> UNLOCK <span class="blink">◂</span>'
     }
   } catch (err) {
-    errorEl.textContent = '❌ CONNECTION ERROR'
+    errorEl.textContent = '⚠️ ERROR: ' + err.message
     btn.disabled = false
     btn.innerHTML = '<span class="blink">▸</span> UNLOCK <span class="blink">◂</span>'
   }
@@ -129,21 +145,25 @@ document.getElementById('submitPassword')?.addEventListener('click', async () =>
 
 async function loadHistory(status = '') {
   const container = document.getElementById('historyContainer')
-  container.innerHTML = '<div class="loading-text">LOADING HISTORY...</div>'
+  container.innerHTML = '<div class="loading-text">MEMUAT HISTORY...</div>'
   try {
     let url = '/api/history'
     if (status) url += `?status=${status}`
     const res = await fetch(url)
     if (res.status === 401) {
       document.getElementById('passwordModal').style.display = 'block'
-      container.style.display = 'none'
+      container.innerHTML = '<div class="empty-history">SILAKAN MASUKKAN PASSWORD ULANG</div>'
       return
     }
-    if (!res.ok) throw new Error('Failed')
+    if (!res.ok) throw new Error('Gagal load: ' + res.status)
     const data = await res.json()
+    if (data.status === false) {
+      container.innerHTML = '<div class="empty-history">ERROR SERVER<br>' + (data.message || 'Tidak diketahui') + '</div>'
+      return
+    }
     if (data.reports?.length > 0) {
       container.innerHTML = data.reports.map(report => {
-        const statusColors = {'baru': '#a5b4fc', 'diproses': '#fbbf24', 'selesai': '#86efac'}
+        const statusColors = {'baru':'#a5b4fc','diproses':'#fbbf24','selesai':'#86efac'}
         const statusColor = statusColors[report.status] || '#60a5fa'
         return `
           <div class="history-item">
@@ -170,7 +190,7 @@ async function loadHistory(status = '') {
       container.innerHTML = '<div class="empty-history">BELUM ADA HISTORY</div>'
     }
   } catch (err) {
-    container.innerHTML = '<div class="empty-history">GAGAL MEMUAT HISTORY</div>'
+    container.innerHTML = `<div class="empty-history">GAGAL MEMUAT<br>${err.message}</div>`
   }
 }
 
@@ -224,7 +244,7 @@ fileInput.onchange = () => {
   }
   preview.innerHTML = ''
   preview.style.display = 'block'
-  fileLabel.innerHTML = `📁 ${file.name.toUpperCase()}`
+  fileLabel.innerHTML = `▶ ${file.name.toUpperCase()}`
   const removeBtn = document.createElement('button')
   removeBtn.className = 'remove-preview'
   removeBtn.innerHTML = '×'
@@ -234,7 +254,7 @@ fileInput.onchange = () => {
     fileInput.value = ''
     preview.style.display = 'none'
     preview.innerHTML = ''
-    fileLabel.innerHTML = '📁 KLIK UNTUK UPLOAD'
+    fileLabel.innerHTML = '▶ KLIK UNTUK UPLOAD'
   }
   preview.appendChild(removeBtn)
   const objectUrl = URL.createObjectURL(file)
@@ -256,7 +276,7 @@ fileInput.onchange = () => {
     preview.appendChild(video)
     const sizeInfo = document.createElement('div')
     sizeInfo.style.cssText = 'padding:8px;margin-top:8px;background:rgba(91,141,239,0.1);border:2px solid #5b8def;font-size:7px;color:#7dd3fc;text-align:center'
-    sizeInfo.innerHTML = `📊 VIDEO SIZE: ${fileSizeMB.toFixed(2)}MB / 20MB MAX`
+    sizeInfo.innerHTML = `📹 VIDEO SIZE: ${fileSizeMB.toFixed(2)}MB / 20MB MAX`
     preview.appendChild(sizeInfo)
   } else {
     const fileInfo = document.createElement('div')
@@ -290,7 +310,7 @@ form.onsubmit = async e => {
     type: 'confirm',
     title: 'CONFIRM',
     message: 'Kirim pesan sekarang?',
-    icon: '❓',
+    icon: '📤',
     confirmText: 'KIRIM',
     cancelText: 'BATAL',
     onConfirm: async () => {
@@ -319,7 +339,7 @@ form.onsubmit = async e => {
               form.reset()
               preview.style.display = 'none'
               preview.innerHTML = ''
-              fileLabel.innerHTML = '📁 KLIK UNTUK UPLOAD'
+              fileLabel.innerHTML = '▶ KLIK UNTUK UPLOAD'
               btn.disabled = false
               btn.innerHTML = '<span class="blink">▸</span> KIRIM <span class="blink">◂</span>'
             }
@@ -334,7 +354,7 @@ form.onsubmit = async e => {
         clearInterval(loadingInterval)
         console.error('Fetch error:', error)
         showStatus('✗ GAGAL TERHUBUNG KE SERVER', 'error')
-        showAlert({type: 'error', title: 'CONNECTION ERROR', message: 'Gagal terhubung ke server. Coba lagi nanti.', icon: '❌'})
+        showAlert({type: 'error', title: 'CONNECTION ERROR', message: 'Gagal terhubung ke server. Coba lagi nanti.', icon: '🔌'})
         btn.disabled = false
         btn.innerHTML = '<span class="blink">▸</span> KIRIM <span class="blink">◂</span>'
       }
