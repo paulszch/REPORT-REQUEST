@@ -645,7 +645,7 @@
   </nav>
   
   <div class="sidebar-footer">
-    <div style="font-size: 7px; color: #1e3a5f;">v1.0 Filnz</div>
+    <div style="font-size: 7px; color: #1e3a5f;">v1.0 RETRO</div>
   </div>
 </div>
 
@@ -658,8 +658,8 @@
 <!-- Form Page -->
 <form class="card page-content active" id="formPage" enctype="multipart/form-data">
 
-  <h1> REQUEST / REPORT </h1>
-  <div class="subtitle">[ SEND REPORT AND REQUEST TO FILNZ BOT ]</div>
+  <h1>⚡ REQUEST / REPORT ⚡</h1>
+  <div class="subtitle">[ KIRIM MASUKAN KE OWNER ]</div>
 
   <label>▸ JENIS</label>
   <select id="type" name="type">
@@ -667,12 +667,12 @@
     <option value="Report">REPORT</option>
   </select>
 
-  <label>▸ NAME</label>
+  <label>▸ NAMA</label>
   <input
     type="text"
     id="name"
     name="name"
-    placeholder="YOUR NAME..."
+    placeholder="NAMA KAMU..."
     required
     autocomplete="name"
   >
@@ -687,17 +687,17 @@
     autocomplete="username"
   >
 
-  <label>▸ MESSAGES</label>
+  <label>▸ PESAN</label>
   <textarea
     id="message"
     name="message"
-    placeholder="TYPE YOU MESSAGE..."
+    placeholder="TULIS PESAN DI SINI..."
     required
   ></textarea>
 
-  <label>▸ FILES <span style="color: #1e3a5f;">(OPTIONAL)</span></label>
+  <label>▸ FILE <span style="color: #1e3a5f;">(OPTIONAL)</span></label>
   <div class="file-box" onclick="document.getElementById('fileInput').click()">
-    <span id="fileLabel">▶ CLICK FOR UPLOAD</span>
+    <span id="fileLabel">▶ KLIK UNTUK UPLOAD</span>
     <small>MAX 50MB</small>
   </div>
 
@@ -724,6 +724,16 @@
   <h1>📜 HISTORY</h1>
   <div class="subtitle">[ RIWAYAT PESAN TERKIRIM ]</div>
   
+  <div style="margin-bottom: 16px;">
+    <label style="font-size: 9px; color: #60a5fa; margin-bottom: 6px; display: block;">FILTER STATUS</label>
+    <select id="statusFilter" style="width: 100%; background: #0f1629; border: 3px solid #1e3a5f; color: #7dd3fc; padding: 8px; font-family: 'Press Start 2P', cursive; font-size: 8px;">
+      <option value="">SEMUA</option>
+      <option value="baru">BARU</option>
+      <option value="diproses">DIPROSES</option>
+      <option value="selesai">SELESAI</option>
+    </select>
+  </div>
+  
   <div class="history-container" id="historyContainer">
     <div class="loading-text">LOADING HISTORY...</div>
   </div>
@@ -738,31 +748,31 @@
     <div class="contact-item">
       <div class="contact-icon">📱</div>
       <div class="contact-label">TELEGRAM OWNER</div>
-      <a href="https://t.me/paullszch" target="_blank" class="contact-link">
-        @paullszch
+      <a href="https://t.me/username" target="_blank" class="contact-link">
+        @YourUsername
       </a>
     </div>
     
     <div class="contact-item">
       <div class="contact-icon">👥</div>
       <div class="contact-label">TELEGRAM GROUP</div>
-      <a href="https://t.me/betabotzinfo" target="_blank" class="contact-link">
-        @betabotzinfo
+      <a href="https://t.me/yourgroup" target="_blank" class="contact-link">
+        @YourGroup
       </a>
     </div>
     
     <div class="contact-item">
       <div class="contact-icon">💻</div>
       <div class="contact-label">GITHUB REPOSITORY</div>
-      <a href="https://github.com/ERLANRAHMAT/telebot-wa" target="_blank" class="contact-link">
-        github.com/ERLANRAHMAT/telebot-wa
+      <a href="https://github.com/yourusername/yourrepo" target="_blank" class="contact-link">
+        github.com/yourrepo
       </a>
     </div>
   </div>
   
   <div class="contact-footer">
     <p style="font-size: 8px; color: #60a5fa; text-align: center; margin-top: 20px;">
-      FEEL FREE TO REACH OUT!
+      FEEL FREE TO REACH OUT! 🚀
     </p>
   </div>
 </div>
