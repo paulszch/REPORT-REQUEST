@@ -147,134 +147,220 @@ navItems.forEach(item => {
   })
 })
 
-// History Authentication
-let historyPassword = sessionStorage.getItem('historyPassword') || null;
+// // History Authentication
+// let historyPassword = sessionStorage.getItem('historyPassword') || null;
 
-function checkHistoryAuth() {
-  const logoutBtn = document.getElementById('logoutBtn')
+// function checkHistoryAuth() {
+//   const logoutBtn = document.getElementById('logoutBtn')
   
-  if (historyPassword) {
-    // Already authenticated, load history
-    document.getElementById('passwordModal').style.display = 'none'
-    document.getElementById('filterSection').style.display = 'block'
-    document.getElementById('historyContainer').style.display = 'block'
-    if (logoutBtn) logoutBtn.style.display = 'block'
-    loadHistory()
-  } else {
-    // Show password modal
-    document.getElementById('passwordModal').style.display = 'block'
-    document.getElementById('filterSection').style.display = 'none'
-    document.getElementById('historyContainer').style.display = 'none'
-    if (logoutBtn) logoutBtn.style.display = 'none'
-    document.getElementById('historyPassword').focus()
+//   if (historyPassword) {
+//     // Already authenticated, load history
+//     document.getElementById('passwordModal').style.display = 'none'
+//     document.getElementById('filterSection').style.display = 'block'
+//     document.getElementById('historyContainer').style.display = 'block'
+//     if (logoutBtn) logoutBtn.style.display = 'block'
+//     loadHistory()
+//   } else {
+//     // Show password modal
+//     document.getElementById('passwordModal').style.display = 'block'
+//     document.getElementById('filterSection').style.display = 'none'
+//     document.getElementById('historyContainer').style.display = 'none'
+//     if (logoutBtn) logoutBtn.style.display = 'none'
+//     document.getElementById('historyPassword').focus()
+//   }
+// }
+
+// // Logout Function
+// document.addEventListener('DOMContentLoaded', () => {
+//   const logoutBtn = document.getElementById('logoutBtn')
+//   if (logoutBtn) {
+//     logoutBtn.addEventListener('click', () => {
+//       showAlert({
+//         type: 'confirm',
+//         title: 'LOGOUT',
+//         message: 'Keluar dari history?',
+//         icon: '🔓',
+//         confirmText: 'LOGOUT',
+//         cancelText: 'BATAL',
+//         onConfirm: () => {
+//           sessionStorage.removeItem('historyPassword')
+//           historyPassword = null
+//           playBeep(400, 100)
+//           checkHistoryAuth()
+          
+//           showAlert({
+//             type: 'info',
+//             title: 'LOGGED OUT',
+//             message: 'Berhasil logout dari history',
+//             icon: '👋'
+//           })
+//         }
+//       })
+//     })
+//   }
+// })
+
+// // Password Submit
+// document.addEventListener('DOMContentLoaded', () => {
+//   const submitPasswordBtn = document.getElementById('submitPassword')
+//   const passwordInput = document.getElementById('historyPassword')
+//   const passwordError = document.getElementById('passwordError')
+  
+//   if (submitPasswordBtn) {
+//     submitPasswordBtn.addEventListener('click', async () => {
+//       const password = passwordInput.value.trim()
+      
+//       if (!password) {
+//         passwordError.textContent = 'PASSWORD REQUIRED!'
+//         playBeep(200, 100)
+//         return
+//       }
+      
+//       submitPasswordBtn.disabled = true
+//       submitPasswordBtn.innerHTML = '<span class="blink">▸</span> CHECKING... <span class="blink">◂</span>'
+//       passwordError.textContent = ''
+      
+//       // Test password by making API call
+//       try {
+//         const response = await fetch('/api/history', {
+//           headers: {
+//             'x-password': password
+//           }
+//         })
+        
+//         if (response.status === 401) {
+//           // Wrong password
+//           passwordError.textContent = '❌ WRONG PASSWORD!'
+//           playBeep(200, 200)
+//           submitPasswordBtn.disabled = false
+//           submitPasswordBtn.innerHTML = '<span class="blink">▸</span> UNLOCK <span class="blink">◂</span>'
+//           passwordInput.value = ''
+//           passwordInput.focus()
+//         } else if (response.ok) {
+//           // Correct password
+//           sessionStorage.setItem('historyPassword', password)
+//           historyPassword = password
+          
+//           playBeep(800, 100)
+//           setTimeout(() => playBeep(1000, 100), 100)
+          
+//           passwordError.textContent = '✓ ACCESS GRANTED!'
+//           passwordError.style.color = '#86efac'
+          
+//           setTimeout(() => {
+//             document.getElementById('passwordModal').style.display = 'none'
+//             document.getElementById('filterSection').style.display = 'block'
+//             document.getElementById('historyContainer').style.display = 'block'
+//             const logoutBtn = document.getElementById('logoutBtn')
+//             if (logoutBtn) logoutBtn.style.display = 'block'
+//             loadHistory()
+//           }, 500)
+//         } else {
+//           throw new Error('Server error')
+//         }
+//       } catch (error) {
+//         console.error('Auth error:', error)
+//         passwordError.textContent = '⚠️ CONNECTION ERROR'
+//         playBeep(200, 200)
+//         submitPasswordBtn.disabled = false
+//         submitPasswordBtn.innerHTML = '<span class="blink">▸</span> UNLOCK <span class="blink">◂</span>'
+//       }
+//     })
+    
+//     // Enter key to submit
+//     passwordInput.addEventListener('keypress', (e) => {
+//       if (e.key === 'Enter') {
+//         submitPasswordBtn.click()
+//       }
+//     })
+//   }
+// })
+
+
+document.getElementById('submitPassword').addEventListener('click', async () => {
+  const password = document.getElementById('historyPassword').value.trim();
+  const errorEl = document.getElementById('passwordError');
+
+  if (!password) {
+    errorEl.textContent = 'PASSWORD REQUIRED!';
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/unlock', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      errorEl.textContent = '✓ ACCESS GRANTED!';
+      errorEl.style.color = '#86efac';
+
+      setTimeout(() => {
+        document.getElementById('passwordModal').style.display = 'none';
+        document.getElementById('filterSection').style.display = 'block';
+        document.getElementById('historyContainer').style.display = 'block';
+        document.getElementById('logoutBtn').style.display = 'block';
+        loadHistory();
+      }, 500);
+    } else {
+      errorEl.textContent = '❌ WRONG PASSWORD!';
+    }
+  } catch (err) {
+    errorEl.textContent = '⚠️ CONNECTION ERROR';
+  }
+});
+
+// Load History (tanpa header password)
+async function loadHistory(status = '') {
+  const container = document.getElementById('historyContainer');
+  container.innerHTML = '<div class="loading-text">LOADING HISTORY...</div>';
+
+  try {
+    let url = '/api/history';
+    if (status) url += `?status=${status}`;
+
+    const res = await fetch(url);  // ← cookie otomatis ikut, tanpa header x-password
+
+    if (res.status === 401) {
+      document.getElementById('passwordModal').style.display = 'block';
+      container.style.display = 'none';
+      return;
+    }
+
+    if (!res.ok) throw new Error('Failed');
+
+    const data = await res.json();
+
+    // Render reports seperti sebelumnya
+    if (data.reports?.length > 0) {
+      container.innerHTML = data.reports.map(report => `...`).join('');
+    } else {
+      container.innerHTML = '<div class="empty-history">BELUM ADA HISTORY</div>';
+    }
+  } catch (err) {
+    container.innerHTML = '<div class="empty-history">GAGAL MEMUAT</div>';
   }
 }
 
-// Logout Function
-document.addEventListener('DOMContentLoaded', () => {
-  const logoutBtn = document.getElementById('logoutBtn')
-  if (logoutBtn) {
-    logoutBtn.addEventListener('click', () => {
-      showAlert({
-        type: 'confirm',
-        title: 'LOGOUT',
-        message: 'Keluar dari history?',
-        icon: '🔓',
-        confirmText: 'LOGOUT',
-        cancelText: 'BATAL',
-        onConfirm: () => {
-          sessionStorage.removeItem('historyPassword')
-          historyPassword = null
-          playBeep(400, 100)
-          checkHistoryAuth()
-          
-          showAlert({
-            type: 'info',
-            title: 'LOGGED OUT',
-            message: 'Berhasil logout dari history',
-            icon: '👋'
-          })
-        }
-      })
-    })
-  }
-})
-
-// Password Submit
-document.addEventListener('DOMContentLoaded', () => {
-  const submitPasswordBtn = document.getElementById('submitPassword')
-  const passwordInput = document.getElementById('historyPassword')
-  const passwordError = document.getElementById('passwordError')
-  
-  if (submitPasswordBtn) {
-    submitPasswordBtn.addEventListener('click', async () => {
-      const password = passwordInput.value.trim()
-      
-      if (!password) {
-        passwordError.textContent = 'PASSWORD REQUIRED!'
-        playBeep(200, 100)
-        return
-      }
-      
-      submitPasswordBtn.disabled = true
-      submitPasswordBtn.innerHTML = '<span class="blink">▸</span> CHECKING... <span class="blink">◂</span>'
-      passwordError.textContent = ''
-      
-      // Test password by making API call
-      try {
-        const response = await fetch('/api/history', {
-          headers: {
-            'x-password': password
-          }
-        })
-        
-        if (response.status === 401) {
-          // Wrong password
-          passwordError.textContent = '❌ WRONG PASSWORD!'
-          playBeep(200, 200)
-          submitPasswordBtn.disabled = false
-          submitPasswordBtn.innerHTML = '<span class="blink">▸</span> UNLOCK <span class="blink">◂</span>'
-          passwordInput.value = ''
-          passwordInput.focus()
-        } else if (response.ok) {
-          // Correct password
-          sessionStorage.setItem('historyPassword', password)
-          historyPassword = password
-          
-          playBeep(800, 100)
-          setTimeout(() => playBeep(1000, 100), 100)
-          
-          passwordError.textContent = '✓ ACCESS GRANTED!'
-          passwordError.style.color = '#86efac'
-          
-          setTimeout(() => {
-            document.getElementById('passwordModal').style.display = 'none'
-            document.getElementById('filterSection').style.display = 'block'
-            document.getElementById('historyContainer').style.display = 'block'
-            const logoutBtn = document.getElementById('logoutBtn')
-            if (logoutBtn) logoutBtn.style.display = 'block'
-            loadHistory()
-          }, 500)
-        } else {
-          throw new Error('Server error')
-        }
-      } catch (error) {
-        console.error('Auth error:', error)
-        passwordError.textContent = '⚠️ CONNECTION ERROR'
-        playBeep(200, 200)
-        submitPasswordBtn.disabled = false
-        submitPasswordBtn.innerHTML = '<span class="blink">▸</span> UNLOCK <span class="blink">◂</span>'
-      }
-    })
-    
-    // Enter key to submit
-    passwordInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') {
-        submitPasswordBtn.click()
-      }
-    })
-  }
-})
+// Logout (ubah ke POST logout)
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  showAlert({
+    type: 'confirm',
+    title: 'LOGOUT',
+    message: 'Keluar dari history?',
+    onConfirm: async () => {
+      await fetch('/api/logout', { method: 'POST' });
+      document.getElementById('passwordModal').style.display = 'block';
+      document.getElementById('historyContainer').style.display = 'none';
+      document.getElementById('logoutBtn').style.display = 'none';
+      showAlert({ type: 'info', title: 'LOGGED OUT', message: 'Berhasil logout' });
+    }
+  });
+});
 
 // Load History Function
 async function loadHistory(status = '') {
@@ -409,7 +495,7 @@ fileInput.onchange = () => {
   const isVideo = file.type.startsWith('video');
   
   // Hard limit 20MB
-  if (file.size > 20 * 1024 * 1024) {
+  if (file.size > 5 * 1024 * 1024) {
     showAlert({
       type: 'error',
       title: 'FILE TOO LARGE',
@@ -702,8 +788,6 @@ document.addEventListener('keydown', (e) => {
       }
     `
     document.head.appendChild(style)
-    
-    // Victory fanfare
     playBeep(523, 150)
     setTimeout(() => playBeep(659, 150), 150)
     setTimeout(() => playBeep(784, 150), 300)
@@ -718,5 +802,5 @@ document.addEventListener('keydown', (e) => {
   }
 })
 
-console.log('%c▸ RETRO TERMINAL v1.0 ◂', 'color: #7dd3fc; font-size: 20px; font-family: monospace; text-shadow: 0 0 10px #5b8def;')
+console.log('%c▸ REQ & REPORT BY FILNZ◂', 'color: #7dd3fc; font-size: 20px; font-family: monospace; text-shadow: 0 0 10px #5b8def;')
 console.log('%cTry the Konami Code: ↑ ↑ ↓ ↓ ← → ← → B A', 'color: #60a5fa; font-family: monospace;')
