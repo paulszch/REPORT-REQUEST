@@ -5,6 +5,7 @@
   "dependencies": {
     "formidable": "^3.5.1",
     "moment-timezone": "^0.5.37",
+    "mongoose": "^9.1.5",
     "node-telegram-bot-api": "^0.66.0"
   }
 }
