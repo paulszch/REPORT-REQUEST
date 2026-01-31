@@ -12,7 +12,7 @@ const alertMessage = document.getElementById('alertMessage')
 const alertButtons = document.getElementById('alertButtons')
 
 function showAlert(options) {
-  const {type = 'info', title = 'INFO', message = '', icon = 'ℹ️', confirmText = 'OK', cancelText = 'CANCEL', onConfirm = () => {}, onCancel = () => {}} = options
+  const {type = 'info', title = 'INFO', message = '', icon = '', confirmText = 'OK', cancelText = 'CANCEL', onConfirm = () => {}, onCancel = () => {}} = options
   const icons = {info: 'ℹ️', success: '✅', warning: '⚠️', error: '❌', confirm: '❓'}
   alertIcon.textContent = icon || icons[type] || icons.info
   alertTitle.textContent = title.toUpperCase()
@@ -121,7 +121,7 @@ document.getElementById('submitPassword')?.addEventListener('click', async () =>
       btn.innerHTML = '<span class="blink">▸</span> UNLOCK <span class="blink">◂</span>'
     }
   } catch (err) {
-    errorEl.textContent = '⚠️ CONNECTION ERROR'
+    errorEl.textContent = '❌ CONNECTION ERROR'
     btn.disabled = false
     btn.innerHTML = '<span class="blink">▸</span> UNLOCK <span class="blink">◂</span>'
   }
@@ -224,7 +224,7 @@ fileInput.onchange = () => {
   }
   preview.innerHTML = ''
   preview.style.display = 'block'
-  fileLabel.innerHTML = `▶ ${file.name.toUpperCase()}`
+  fileLabel.innerHTML = `📁 ${file.name.toUpperCase()}`
   const removeBtn = document.createElement('button')
   removeBtn.className = 'remove-preview'
   removeBtn.innerHTML = '×'
@@ -234,7 +234,7 @@ fileInput.onchange = () => {
     fileInput.value = ''
     preview.style.display = 'none'
     preview.innerHTML = ''
-    fileLabel.innerHTML = '▶ KLIK UNTUK UPLOAD'
+    fileLabel.innerHTML = '📁 KLIK UNTUK UPLOAD'
   }
   preview.appendChild(removeBtn)
   const objectUrl = URL.createObjectURL(file)
@@ -256,7 +256,7 @@ fileInput.onchange = () => {
     preview.appendChild(video)
     const sizeInfo = document.createElement('div')
     sizeInfo.style.cssText = 'padding:8px;margin-top:8px;background:rgba(91,141,239,0.1);border:2px solid #5b8def;font-size:7px;color:#7dd3fc;text-align:center'
-    sizeInfo.innerHTML = `📹 VIDEO SIZE: ${fileSizeMB.toFixed(2)}MB / 20MB MAX`
+    sizeInfo.innerHTML = `📊 VIDEO SIZE: ${fileSizeMB.toFixed(2)}MB / 20MB MAX`
     preview.appendChild(sizeInfo)
   } else {
     const fileInfo = document.createElement('div')
@@ -290,7 +290,7 @@ form.onsubmit = async e => {
     type: 'confirm',
     title: 'CONFIRM',
     message: 'Kirim pesan sekarang?',
-    icon: '📤',
+    icon: '❓',
     confirmText: 'KIRIM',
     cancelText: 'BATAL',
     onConfirm: async () => {
@@ -319,7 +319,7 @@ form.onsubmit = async e => {
               form.reset()
               preview.style.display = 'none'
               preview.innerHTML = ''
-              fileLabel.innerHTML = '▶ KLIK UNTUK UPLOAD'
+              fileLabel.innerHTML = '📁 KLIK UNTUK UPLOAD'
               btn.disabled = false
               btn.innerHTML = '<span class="blink">▸</span> KIRIM <span class="blink">◂</span>'
             }
@@ -334,7 +334,7 @@ form.onsubmit = async e => {
         clearInterval(loadingInterval)
         console.error('Fetch error:', error)
         showStatus('✗ GAGAL TERHUBUNG KE SERVER', 'error')
-        showAlert({type: 'error', title: 'CONNECTION ERROR', message: 'Gagal terhubung ke server. Coba lagi nanti.', icon: '🔌'})
+        showAlert({type: 'error', title: 'CONNECTION ERROR', message: 'Gagal terhubung ke server. Coba lagi nanti.', icon: '❌'})
         btn.disabled = false
         btn.innerHTML = '<span class="blink">▸</span> KIRIM <span class="blink">◂</span>'
       }
