@@ -4,206 +4,701 @@
   <meta charset="UTF-8">
   <title>Request & Report</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
-      font-family: 'Inter', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Sidebar Styles */
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: -280px;
+      width: 280px;
+      height: 100vh;
+      background: #151b33;
+      border-right: 4px solid #5b8def;
+      z-index: 1001;
+      transition: left 0.3s ease;
+      overflow-y: auto;
+      box-shadow: 0 0 30px rgba(91, 141, 239, 0.3);
+    }
+
+    .sidebar.active {
+      left: 0;
+    }
+
+    .sidebar-header {
+      padding: 20px;
+      border-bottom: 3px solid #1e3a5f;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .sidebar-header h2 {
+      font-size: 14px;
+      color: #7dd3fc;
+      letter-spacing: 2px;
+      font-family: 'Press Start 2P', cursive;
+    }
+
+    .sidebar-close {
+      background: none;
+      border: none;
+      color: #7dd3fc;
+      font-size: 24px;
+      cursor: pointer;
+      padding: 0;
+      width: 30px;
+      height: 30px;
+      font-family: 'Press Start 2P', cursive;
+      transition: all 0.2s;
+    }
+
+    .sidebar-close:hover {
+      color: #f472b6;
+      transform: rotate(90deg);
+    }
+
+    .sidebar-nav {
+      padding: 10px 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 15px 20px;
+      color: #60a5fa;
+      text-decoration: none;
+      border-left: 4px solid transparent;
+      transition: all 0.2s;
+      font-size: 10px;
+      font-family: 'Press Start 2P', cursive;
+      letter-spacing: 1px;
+    }
+
+    .nav-item:hover {
+      background: rgba(91, 141, 239, 0.1);
+      border-left-color: #5b8def;
+      padding-left: 25px;
+    }
+
+    .nav-item.active {
+      background: rgba(91, 141, 239, 0.2);
+      border-left-color: #7dd3fc;
+      color: #7dd3fc;
+    }
+
+    .nav-icon {
+      margin-right: 12px;
+      font-size: 16px;
+    }
+
+    .sidebar-footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 20px;
+      border-top: 3px solid #1e3a5f;
+      text-align: center;
+    }
+
+    .sidebar-toggle {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: #1e3a5f;
+      border: 3px solid #5b8def;
+      color: #7dd3fc;
+      font-size: 20px;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      z-index: 999;
+      font-family: 'Press Start 2P', cursive;
+      transition: all 0.2s;
+      box-shadow: 0 0 10px rgba(91, 141, 239, 0.3);
+    }
+
+    .sidebar-toggle:hover {
+      background: #2d5082;
+      box-shadow: 0 0 20px rgba(91, 141, 239, 0.6);
+      transform: scale(1.05);
+    }
+
+    .sidebar-toggle:active {
+      transform: scale(0.95);
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      display: none;
+      backdrop-filter: blur(2px);
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    .main-content {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .page-content {
+      display: none;
+    }
+
+    .page-content.active {
+      display: block;
+    }
+
+    /* History Page Styles */
+    .history-container {
+      max-height: 400px;
+      overflow-y: auto;
+      padding: 10px;
+      background: #0f1629;
+      border: 3px solid #1e3a5f;
+      margin-bottom: 10px;
+    }
+
+    .history-item {
+      background: #151b33;
+      border: 2px solid #1e3a5f;
+      padding: 12px;
+      margin-bottom: 10px;
+      font-size: 8px;
+      line-height: 1.6;
+      transition: all 0.2s;
+    }
+
+    .history-item:hover {
+      border-color: #5b8def;
+      box-shadow: 0 0 10px rgba(91, 141, 239, 0.2);
+    }
+
+    .history-item-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #1e3a5f;
+    }
+
+    .history-type {
+      color: #86efac;
+      font-weight: bold;
+    }
+
+    .history-date {
+      color: #60a5fa;
+    }
+
+    .history-body {
+      color: #7dd3fc;
+    }
+
+    .loading-text {
+      text-align: center;
+      color: #60a5fa;
+      font-size: 10px;
+      padding: 40px 20px;
+      animation: blink 1s infinite;
+    }
+
+    .empty-history {
+      text-align: center;
+      color: #60a5fa;
+      font-size: 10px;
+      padding: 40px 20px;
+    }
+
+    /* Contact Page Styles */
+    .contact-container {
+      padding: 10px 0;
+    }
+
+    .contact-item {
+      background: #0f1629;
+      border: 3px solid #1e3a5f;
+      padding: 16px;
+      margin-bottom: 16px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .contact-item:hover {
+      border-color: #5b8def;
+      box-shadow: 0 0 15px rgba(91, 141, 239, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .contact-icon {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+
+    .contact-label {
+      font-size: 9px;
+      color: #60a5fa;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .contact-link {
+      display: inline-block;
+      color: #7dd3fc;
+      text-decoration: none;
+      font-size: 10px;
+      padding: 8px 16px;
+      border: 2px solid #5b8def;
+      margin-top: 8px;
+      transition: all 0.2s;
+      background: rgba(91, 141, 239, 0.1);
+    }
+
+    .contact-link:hover {
+      background: rgba(91, 141, 239, 0.2);
+      box-shadow: 0 0 10px rgba(91, 141, 239, 0.5);
+      transform: scale(1.05);
+    }
+
+    /* Scrollbar Styles */
+    .history-container::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .history-container::-webkit-scrollbar-track {
+      background: #0f1629;
+    }
+
+    .history-container::-webkit-scrollbar-thumb {
+      background: #1e3a5f;
+      border: 1px solid #5b8def;
+    }
+
+    .history-container::-webkit-scrollbar-thumb:hover {
+      background: #2d5082;
     }
 
     body {
       min-height: 100vh;
       margin: 0;
-      background: linear-gradient(135deg, #020617, #020617, #0f172a);
+      background: #0a0e27;
+      background-image: 
+        repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(100,150,255,.02) 2px, rgba(100,150,255,.02) 4px),
+        repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(100,150,255,.02) 2px, rgba(100,150,255,.02) 4px);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
+      color: #7dd3fc;
       padding: 20px;
+      font-family: 'Press Start 2P', cursive;
+      image-rendering: pixelated;
+    }
+
+    .scanline {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      background: linear-gradient(
+        to bottom,
+        transparent 50%,
+        rgba(0, 0, 0, 0.1) 50%
+      );
+      background-size: 100% 4px;
+      z-index: 1000;
+      animation: scanline 8s linear infinite;
+    }
+
+    @keyframes scanline {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(4px); }
     }
 
     .card {
       width: 100%;
-      max-width: 460px;
-      padding: 24px;
-      border-radius: 18px;
-      background: rgba(15, 23, 42, 0.7);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.08);
-      box-shadow: 0 20px 40px rgba(0,0,0,.4);
+      max-width: 500px;
+      padding: 20px;
+      background: #151b33;
+      border: 4px solid #5b8def;
+      box-shadow: 
+        0 0 20px rgba(91, 141, 239, 0.3),
+        inset 0 0 20px rgba(91, 141, 239, 0.08);
+      position: relative;
+      z-index: 10;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      right: -4px;
+      bottom: -4px;
+      background: linear-gradient(45deg, #5b8def, #818cf8, #5b8def);
+      z-index: -1;
+      opacity: 0.2;
+      filter: blur(8px);
     }
 
     h1 {
-      margin: 0 0 6px;
       text-align: center;
-      font-size: 22px;
+      font-size: 16px;
+      color: #7dd3fc;
+      margin-bottom: 8px;
+      text-shadow: 2px 2px 0 #1e3a5f, 0 0 10px #5b8def;
+      letter-spacing: 2px;
     }
 
     .subtitle {
       text-align: center;
-      font-size: 13px;
-      color: #94a3b8;
-      margin-bottom: 18px;
+      font-size: 8px;
+      color: #60a5fa;
+      margin-bottom: 20px;
+      letter-spacing: 1px;
+    }
+
+    .blink {
+      animation: blink 1s step-start infinite;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
     }
 
     label {
-      font-size: 12px;
-      color: #cbd5f5;
-      margin-bottom: 4px;
+      font-size: 10px;
+      color: #7dd3fc;
+      margin-bottom: 6px;
       display: block;
+      text-transform: uppercase;
+      letter-spacing: 1px;
     }
 
     select, input, textarea {
       width: 100%;
-      background: #020617;
-      border: 1px solid #1e293b;
-      color: #fff;
-      padding: 10px 12px;
-      border-radius: 10px;
-      margin-bottom: 14px;
+      background: #0f1629;
+      border: 3px solid #1e3a5f;
+      color: #7dd3fc;
+      padding: 10px;
+      margin-bottom: 16px;
       outline: none;
-      transition: border-color 0.3s;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
+      transition: all 0.1s;
     }
 
     select:focus, input:focus, textarea:focus {
-      border-color: #22c55e;
+      border-color: #5b8def;
+      box-shadow: 0 0 10px rgba(91, 141, 239, 0.5);
+    }
+
+    select {
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L6 6L11 1' stroke='%237dd3fc' stroke-width='2'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 30px;
     }
 
     textarea {
       resize: none;
       min-height: 100px;
+      line-height: 1.6;
     }
 
     .file-box {
-      border: 1px dashed #334155;
-      border-radius: 12px;
-      padding: 14px;
+      border: 3px dashed #1e3a5f;
+      padding: 16px;
       text-align: center;
       cursor: pointer;
-      color: #94a3b8;
-      margin-bottom: 12px;
-      transition: all 0.3s;
+      color: #60a5fa;
+      margin-bottom: 16px;
+      transition: all 0.2s;
+      font-size: 8px;
+      background: #0f1629;
     }
 
     .file-box:hover {
-      background: rgba(255,255,255,0.03);
-      border-color: #22c55e;
+      border-color: #5b8def;
+      background: #151b33;
+      box-shadow: 0 0 10px rgba(91, 141, 239, 0.2);
+    }
+
+    .file-box small {
+      display: block;
+      margin-top: 8px;
+      font-size: 7px;
     }
 
     .preview {
-      margin-top: 10px;
+      margin-bottom: 16px;
       display: none;
       position: relative;
+      border: 3px solid #5b8def;
+      background: #0f1629;
+      padding: 4px;
     }
 
     .preview img,
     .preview video {
       width: 100%;
-      border-radius: 10px;
+      border: 2px solid #1e3a5f;
       max-height: 240px;
       object-fit: contain;
-      background: #020617;
+      background: #000;
+      image-rendering: pixelated;
     }
 
     .remove-preview {
       position: absolute;
       top: 10px;
       right: 10px;
-      background: rgba(0,0,0,0.7);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
+      background: #f472b6;
+      color: #fff;
+      border: 3px solid #ec4899;
+      width: 32px;
+      height: 32px;
       cursor: pointer;
       z-index: 10;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 16px;
+      line-height: 1;
+      box-shadow: 0 0 10px rgba(244, 114, 182, 0.5);
+      transition: all 0.1s;
+    }
+
+    .remove-preview:hover {
+      background: #f9a8d4;
+      transform: scale(1.1);
+    }
+
+    .remove-preview:active {
+      transform: scale(0.95);
     }
 
     button {
       width: 100%;
-      padding: 12px;
-      border-radius: 12px;
-      border: none;
+      padding: 14px;
+      border: 4px solid #5b8def;
       font-weight: 600;
       cursor: pointer;
-      background: linear-gradient(135deg, #22c55e, #16a34a);
-      color: #022c22;
-      transition: transform .1s ease, opacity 0.3s;
+      background: #1e3a5f;
+      color: #7dd3fc;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      transition: all 0.1s;
+      box-shadow: 0 0 10px rgba(91, 141, 239, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(91, 141, 239, 0.3), transparent);
+      transition: left 0.5s;
+    }
+
+    button:hover::before {
+      left: 100%;
+    }
+
+    button:hover {
+      background: #2d5082;
+      box-shadow: 0 0 20px rgba(91, 141, 239, 0.6);
     }
 
     button:active {
-      transform: scale(.98);
+      transform: scale(0.98);
     }
 
     button:disabled {
-      background: #334155;
-      color: #94a3b8;
+      background: #151b33;
+      color: #1e3a5f;
+      border-color: #1e3a5f;
       cursor: not-allowed;
-      opacity: 0.7;
+      box-shadow: none;
     }
 
     .status {
       text-align: center;
-      margin-top: 10px;
-      font-size: 14px;
-      min-height: 20px;
+      margin: 12px 0;
+      font-size: 9px;
+      min-height: 24px;
+      padding: 8px;
+      letter-spacing: 1px;
     }
 
     .success {
-      color: #22c55e;
+      color: #86efac;
+      background: rgba(134, 239, 172, 0.1);
+      border: 2px solid #86efac;
+      animation: pulse 1s ease-in-out;
     }
 
     .error {
-      color: #ef4444;
+      color: #fca5a5;
+      background: rgba(252, 165, 165, 0.1);
+      border: 2px solid #fca5a5;
+      animation: shake 0.3s;
+    }
+
+    .info {
+      color: #a5b4fc;
+      background: rgba(165, 180, 252, 0.1);
+      border: 2px solid #a5b4fc;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    /* Pixel corners decoration */
+    .card::after {
+      content: '';
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      right: 8px;
+      bottom: 8px;
+      border: 1px solid rgba(91, 141, 239, 0.2);
+      pointer-events: none;
+    }
+
+    /* Screen flicker effect */
+    @keyframes flicker {
+      0% { opacity: 1; }
+      95% { opacity: 1; }
+      96% { opacity: 0.8; }
+      97% { opacity: 1; }
+      98% { opacity: 0.9; }
+      100% { opacity: 1; }
+    }
+
+    body {
+      animation: flicker 5s infinite;
     }
   </style>
 </head>
 <body>
 
-<form class="card" id="reportForm" enctype="multipart/form-data">
+<div class="scanline"></div>
 
-  <h1>Request / Report</h1>
-  <div class="subtitle">Kirim masukan langsung ke owner</div>
+<!-- Sidebar Toggle Button -->
+<button class="sidebar-toggle" id="sidebarToggle">☰</button>
 
-  <label>Jenis</label>
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h2>MENU</h2>
+    <button class="sidebar-close" id="sidebarClose">×</button>
+  </div>
+  
+  <nav class="sidebar-nav">
+    <a href="#" class="nav-item active" data-page="form">
+      <span class="nav-icon">📝</span>
+      <span class="nav-text">FORM</span>
+    </a>
+    <a href="#" class="nav-item" data-page="history">
+      <span class="nav-icon">📜</span>
+      <span class="nav-text">HISTORY</span>
+    </a>
+    <a href="#" class="nav-item" data-page="contact">
+      <span class="nav-icon">📞</span>
+      <span class="nav-text">CONTACT</span>
+    </a>
+  </nav>
+  
+  <div class="sidebar-footer">
+    <div style="font-size: 7px; color: #1e3a5f;">v1.0 Filnz</div>
+  </div>
+</div>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay"></div>
+
+<!-- Main Content -->
+<div class="main-content">
+
+<!-- Form Page -->
+<form class="card page-content active" id="formPage" enctype="multipart/form-data">
+
+  <h1> REQUEST / REPORT </h1>
+  <div class="subtitle">[ SEND REPORT AND REQUEST TO FILNZ BOT ]</div>
+
+  <label>▸ JENIS</label>
   <select id="type" name="type">
-    <option value="Request">Request</option>
-    <option value="Report">Report</option>
+    <option value="Request">REQUEST</option>
+    <option value="Report">REPORT</option>
   </select>
 
-  <label>Nama</label>
+  <label>▸ NAME</label>
   <input
     type="text"
     id="name"
     name="name"
-    placeholder="Nama kamu"
+    placeholder="YOUR NAME..."
     required
     autocomplete="name"
   >
 
-  <label>ID</label>
+  <label>▸ USER ID</label>
   <input
     type="text"
     id="userid"
     name="userid"
-    placeholder="ID akun / user"
+    placeholder="ID AKUN / USER..."
     required
     autocomplete="username"
   >
 
-  <label>Pesan</label>
+  <label>▸ MESSAGES</label>
   <textarea
     id="message"
     name="message"
-    placeholder="Tulis pesan kamu di sini..."
+    placeholder="TYPE YOU MESSAGE..."
     required
   ></textarea>
 
-  <label>File (opsional)</label>
+  <label>▸ FILES <span style="color: #1e3a5f;">(OPTIONAL)</span></label>
   <div class="file-box" onclick="document.getElementById('fileInput').click()">
-    <span id="fileLabel">Klik untuk upload gambar / video</span>
-    <br>
-    <small>Maksimal 50MB</small>
+    <span id="fileLabel">▶ CLICK FOR UPLOAD</span>
+    <small>MAX 50MB</small>
   </div>
 
   <input
@@ -218,9 +713,61 @@
 
   <div class="status" id="status"></div>
 
-  <button type="submit" id="send">Kirim</button>
+  <button type="submit" id="send">
+    <span class="blink">▸</span> KIRIM <span class="blink">◂</span>
+  </button>
 
 </form>
+
+<!-- History Page -->
+<div class="card page-content" id="historyPage">
+  <h1>📜 HISTORY</h1>
+  <div class="subtitle">[ RIWAYAT PESAN TERKIRIM ]</div>
+  
+  <div class="history-container" id="historyContainer">
+    <div class="loading-text">LOADING HISTORY...</div>
+  </div>
+</div>
+
+<!-- Contact Page -->
+<div class="card page-content" id="contactPage">
+  <h1>📞 CONTACT</h1>
+  <div class="subtitle">[ HUBUNGI KAMI ]</div>
+  
+  <div class="contact-container">
+    <div class="contact-item">
+      <div class="contact-icon">📱</div>
+      <div class="contact-label">TELEGRAM OWNER</div>
+      <a href="https://t.me/paullszch" target="_blank" class="contact-link">
+        @paullszch
+      </a>
+    </div>
+    
+    <div class="contact-item">
+      <div class="contact-icon">👥</div>
+      <div class="contact-label">TELEGRAM GROUP</div>
+      <a href="https://t.me/betabotzinfo" target="_blank" class="contact-link">
+        @betabotzinfo
+      </a>
+    </div>
+    
+    <div class="contact-item">
+      <div class="contact-icon">💻</div>
+      <div class="contact-label">GITHUB REPOSITORY</div>
+      <a href="https://github.com/ERLANRAHMAT/telebot-wa" target="_blank" class="contact-link">
+        github.com/ERLANRAHMAT/telebot-wa
+      </a>
+    </div>
+  </div>
+  
+  <div class="contact-footer">
+    <p style="font-size: 8px; color: #60a5fa; text-align: center; margin-top: 20px;">
+      FEEL FREE TO REACH OUT!
+    </p>
+  </div>
+</div>
+
+</div>
 
 <script src="script.js"></script>
 </body>
