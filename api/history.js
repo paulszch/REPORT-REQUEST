@@ -1,9 +1,7 @@
-// api/history.js
 import dbConnect from '../lib/dbConnect.js';
 import Report from '../models/Report.js';
 
-// Simple authentication - bisa diganti dengan JWT atau session
-const HISTORY_PASSWORD = process.env.HISTORY_PASSWORD || 'owner123'; // Set di .env
+const activeTokens = require('./unlock').activeTokens || new Map();
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -11,14 +9,22 @@ export default async function handler(req, res) {
     return res.status(405).json({ message: 'Method Not Allowed' });
   }
 
-  // Check authentication
-  const authHeader = req.headers.authorization;
-  const password = req.headers['x-password'];
-  
-  if (!password || password !== HISTORY_PASSWORD) {
+  const token = req.cookies?.hist_token;
+
+  if (!token || !activeTokens.has(token)) {
     return res.status(401).json({
       status: false,
-      message: 'Unauthorized - Password required',
+      message: 'Unauthorized - Silakan masukkan password terlebih dahulu',
+      reports: []
+    });
+  }
+
+  const expiresAt = activeTokens.get(token);
+  if (Date.now() > expiresAt) {
+    activeTokens.delete(token);
+    return res.status(401).json({
+      status: false,
+      message: 'Sesi kadaluarsa',
       reports: []
     });
   }
@@ -26,24 +32,21 @@ export default async function handler(req, res) {
   try {
     await dbConnect();
 
-    // Get query parameters for pagination (optional)
     const limit = parseInt(req.query.limit) || 50;
     const skip = parseInt(req.query.skip) || 0;
-    const status = req.query.status; // Filter by status (optional)
+    const status = req.query.status;
 
-    // Build query
     const query = {};
     if (status) {
       query.status = status;
     }
 
-    // Fetch reports from database, sorted by newest first
     const reports = await Report.find(query)
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip(skip)
-      .select('-__v') // Exclude version field
-      .lean(); // Convert to plain JavaScript objects
+      .select('-__v')
+      .lean(); 
 
     const total = await Report.countDocuments(query);
 
