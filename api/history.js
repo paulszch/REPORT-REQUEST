@@ -1,7 +1,7 @@
 import dbConnect from '../lib/dbConnect.js';
 import Report from '../models/Report.js';
 
-const activeTokens = require('./unlock').activeTokens || new Map();
+import { activeTokens } from './unlock.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
