@@ -5,7 +5,6 @@ const statusDiv = document.getElementById('status')
 const fileLabel = document.getElementById('fileLabel')
 const form = document.getElementById('formPage')
 
-// Custom Alert System
 const alertOverlay = document.getElementById('alertOverlay')
 const alertIcon = document.getElementById('alertIcon')
 const alertTitle = document.getElementById('alertTitle')
@@ -14,7 +13,7 @@ const alertButtons = document.getElementById('alertButtons')
 
 function showAlert(options) {
   const {
-    type = 'info', // info, success, warning, error, confirm
+    type = 'info',
     title = 'INFO',
     message = '',
     icon = 'ℹ️',
@@ -24,7 +23,6 @@ function showAlert(options) {
     onCancel = () => {}
   } = options;
 
-  // Set icon based on type
   const icons = {
     info: 'ℹ️',
     success: '✅',
@@ -37,11 +35,9 @@ function showAlert(options) {
   alertTitle.textContent = title.toUpperCase();
   alertMessage.textContent = message.toUpperCase();
 
-  // Clear previous buttons
   alertButtons.innerHTML = '';
 
   if (type === 'confirm') {
-    // Confirm dialog with Cancel and OK
     const cancelBtn = document.createElement('button');
     cancelBtn.className = 'alert-btn';
     cancelBtn.textContent = cancelText;
@@ -63,7 +59,6 @@ function showAlert(options) {
     alertButtons.appendChild(cancelBtn);
     alertButtons.appendChild(confirmBtn);
   } else {
-    // Regular alert with just OK
     const okBtn = document.createElement('button');
     okBtn.className = `alert-btn ${type === 'error' ? 'danger' : 'primary'}`;
     okBtn.textContent = confirmText;
@@ -76,10 +71,8 @@ function showAlert(options) {
     alertButtons.appendChild(okBtn);
   }
 
-  // Show overlay
   alertOverlay.classList.add('active');
-  
-  // Sound effect
+
   if (type === 'success') {
     playBeep(800, 100);
   } else if (type === 'error') {
@@ -93,14 +86,12 @@ function hideAlert() {
   alertOverlay.classList.remove('active');
 }
 
-// Close alert when clicking outside
 alertOverlay.addEventListener('click', (e) => {
   if (e.target === alertOverlay) {
     hideAlert();
   }
 });
 
-// Sidebar Navigation
 const sidebar = document.getElementById('sidebar')
 const sidebarToggle = document.getElementById('sidebarToggle')
 const sidebarClose = document.getElementById('sidebarClose')
@@ -108,7 +99,6 @@ const overlay = document.getElementById('overlay')
 const navItems = document.querySelectorAll('.nav-item')
 const pages = document.querySelectorAll('.page-content')
 
-// Toggle Sidebar
 function toggleSidebar() {
   sidebar.classList.toggle('active')
   overlay.classList.toggle('active')
@@ -119,26 +109,21 @@ sidebarToggle.addEventListener('click', toggleSidebar)
 sidebarClose.addEventListener('click', toggleSidebar)
 overlay.addEventListener('click', toggleSidebar)
 
-// Page Navigation
 navItems.forEach(item => {
   item.addEventListener('click', (e) => {
     e.preventDefault()
     const targetPage = item.dataset.page
     
-    // Update active nav item
     navItems.forEach(nav => nav.classList.remove('active'))
     item.classList.add('active')
     
-    // Show target page
     pages.forEach(page => page.classList.remove('active'))
     document.getElementById(targetPage + 'Page').classList.add('active')
     
-    // Close sidebar on mobile
     if (window.innerWidth < 768) {
       toggleSidebar()
     }
     
-    // Load history if history page (check authentication first)
     if (targetPage === 'history') {
       checkHistoryAuth()
     }
@@ -147,137 +132,19 @@ navItems.forEach(item => {
   })
 })
 
-// // History Authentication
-// let historyPassword = sessionStorage.getItem('historyPassword') || null;
-
-// function checkHistoryAuth() {
-//   const logoutBtn = document.getElementById('logoutBtn')
+function checkHistoryAuth() {
+  const logoutBtn = document.getElementById('logoutBtn')
   
-//   if (historyPassword) {
-//     // Already authenticated, load history
-//     document.getElementById('passwordModal').style.display = 'none'
-//     document.getElementById('filterSection').style.display = 'block'
-//     document.getElementById('historyContainer').style.display = 'block'
-//     if (logoutBtn) logoutBtn.style.display = 'block'
-//     loadHistory()
-//   } else {
-//     // Show password modal
-//     document.getElementById('passwordModal').style.display = 'block'
-//     document.getElementById('filterSection').style.display = 'none'
-//     document.getElementById('historyContainer').style.display = 'none'
-//     if (logoutBtn) logoutBtn.style.display = 'none'
-//     document.getElementById('historyPassword').focus()
-//   }
-// }
+  loadHistory().catch(() => {
+    document.getElementById('passwordModal').style.display = 'block'
+    document.getElementById('filterSection').style.display = 'none'
+    document.getElementById('historyContainer').style.display = 'none'
+    if (logoutBtn) logoutBtn.style.display = 'none'
+    document.getElementById('historyPassword').focus()
+  })
+}
 
-// // Logout Function
-// document.addEventListener('DOMContentLoaded', () => {
-//   const logoutBtn = document.getElementById('logoutBtn')
-//   if (logoutBtn) {
-//     logoutBtn.addEventListener('click', () => {
-//       showAlert({
-//         type: 'confirm',
-//         title: 'LOGOUT',
-//         message: 'Keluar dari history?',
-//         icon: '🔓',
-//         confirmText: 'LOGOUT',
-//         cancelText: 'BATAL',
-//         onConfirm: () => {
-//           sessionStorage.removeItem('historyPassword')
-//           historyPassword = null
-//           playBeep(400, 100)
-//           checkHistoryAuth()
-          
-//           showAlert({
-//             type: 'info',
-//             title: 'LOGGED OUT',
-//             message: 'Berhasil logout dari history',
-//             icon: '👋'
-//           })
-//         }
-//       })
-//     })
-//   }
-// })
-
-// // Password Submit
-// document.addEventListener('DOMContentLoaded', () => {
-//   const submitPasswordBtn = document.getElementById('submitPassword')
-//   const passwordInput = document.getElementById('historyPassword')
-//   const passwordError = document.getElementById('passwordError')
-  
-//   if (submitPasswordBtn) {
-//     submitPasswordBtn.addEventListener('click', async () => {
-//       const password = passwordInput.value.trim()
-      
-//       if (!password) {
-//         passwordError.textContent = 'PASSWORD REQUIRED!'
-//         playBeep(200, 100)
-//         return
-//       }
-      
-//       submitPasswordBtn.disabled = true
-//       submitPasswordBtn.innerHTML = '<span class="blink">▸</span> CHECKING... <span class="blink">◂</span>'
-//       passwordError.textContent = ''
-      
-//       // Test password by making API call
-//       try {
-//         const response = await fetch('/api/history', {
-//           headers: {
-//             'x-password': password
-//           }
-//         })
-        
-//         if (response.status === 401) {
-//           // Wrong password
-//           passwordError.textContent = '❌ WRONG PASSWORD!'
-//           playBeep(200, 200)
-//           submitPasswordBtn.disabled = false
-//           submitPasswordBtn.innerHTML = '<span class="blink">▸</span> UNLOCK <span class="blink">◂</span>'
-//           passwordInput.value = ''
-//           passwordInput.focus()
-//         } else if (response.ok) {
-//           // Correct password
-//           sessionStorage.setItem('historyPassword', password)
-//           historyPassword = password
-          
-//           playBeep(800, 100)
-//           setTimeout(() => playBeep(1000, 100), 100)
-          
-//           passwordError.textContent = '✓ ACCESS GRANTED!'
-//           passwordError.style.color = '#86efac'
-          
-//           setTimeout(() => {
-//             document.getElementById('passwordModal').style.display = 'none'
-//             document.getElementById('filterSection').style.display = 'block'
-//             document.getElementById('historyContainer').style.display = 'block'
-//             const logoutBtn = document.getElementById('logoutBtn')
-//             if (logoutBtn) logoutBtn.style.display = 'block'
-//             loadHistory()
-//           }, 500)
-//         } else {
-//           throw new Error('Server error')
-//         }
-//       } catch (error) {
-//         console.error('Auth error:', error)
-//         passwordError.textContent = '⚠️ CONNECTION ERROR'
-//         playBeep(200, 200)
-//         submitPasswordBtn.disabled = false
-//         submitPasswordBtn.innerHTML = '<span class="blink">▸</span> UNLOCK <span class="blink">◂</span>'
-//       }
-//     })
-    
-//     // Enter key to submit
-//     passwordInput.addEventListener('keypress', (e) => {
-//       if (e.key === 'Enter') {
-//         submitPasswordBtn.click()
-//       }
-//     })
-//   }
-// })
-
-
-document.getElementById('submitPassword').addEventListener('click', async () => {
+document.getElementById('submitPassword')?.addEventListener('click', async () => {
   const password = document.getElementById('historyPassword').value.trim();
   const errorEl = document.getElementById('passwordError');
 
@@ -314,7 +181,6 @@ document.getElementById('submitPassword').addEventListener('click', async () => 
   }
 });
 
-// Load History (tanpa header password)
 async function loadHistory(status = '') {
   const container = document.getElementById('historyContainer');
   container.innerHTML = '<div class="loading-text">LOADING HISTORY...</div>';
@@ -323,7 +189,7 @@ async function loadHistory(status = '') {
     let url = '/api/history';
     if (status) url += `?status=${status}`;
 
-    const res = await fetch(url);  // ← cookie otomatis ikut, tanpa header x-password
+    const res = await fetch(url);
 
     if (res.status === 401) {
       document.getElementById('passwordModal').style.display = 'block';
@@ -331,23 +197,51 @@ async function loadHistory(status = '') {
       return;
     }
 
-    if (!res.ok) throw new Error('Failed');
+    if (!res.ok) throw new Error('Failed to load');
 
     const data = await res.json();
 
-    // Render reports seperti sebelumnya
     if (data.reports?.length > 0) {
-      container.innerHTML = data.reports.map(report => `...`).join('');
+      container.innerHTML = data.reports.map(report => {
+        const statusColors = {
+          'baru': '#a5b4fc',
+          'diproses': '#fbbf24',
+          'selesai': '#86efac'
+        };
+        const statusColor = statusColors[report.status] || '#60a5fa';
+
+        return `
+          <div class="history-item">
+            <div class="history-item-header">
+              <span class="history-type">${(report.type || 'UNKNOWN').toUpperCase()}</span>
+              <span class="history-date">${report.createdAt ? new Date(report.createdAt).toLocaleDateString('id-ID', { 
+                day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+              }) : 'N/A'}</span>
+            </div>
+            <div class="history-body">
+              <div style="margin-bottom: 6px;">
+                <span style="background: ${statusColor}22; border: 1px solid ${statusColor}; color: ${statusColor}; padding: 2px 6px; font-size: 7px; border-radius: 3px;">
+                  ${(report.status || 'baru').toUpperCase()}
+                </span>
+              </div>
+              <div style="margin-bottom: 4px;"><strong>NAMA:</strong> ${report.name || 'N/A'}</div>
+              <div style="margin-bottom: 4px;"><strong>USER ID:</strong> ${report.userid || 'N/A'}</div>
+              <div style="margin-bottom: 4px;"><strong>PESAN:</strong></div>
+              <div style="color: #60a5fa;">${report.message || 'No message'}</div>
+              ${report.fileName ? `<div style="margin-top: 6px; color: #86efac; font-size: 7px;">📎 ${report.fileName}</div>` : ''}
+            </div>
+          </div>
+        `;
+      }).join('');
     } else {
       container.innerHTML = '<div class="empty-history">BELUM ADA HISTORY</div>';
     }
   } catch (err) {
-    container.innerHTML = '<div class="empty-history">GAGAL MEMUAT</div>';
+    container.innerHTML = '<div class="empty-history">GAGAL MEMUAT HISTORY</div>';
   }
 }
 
-// Logout (ubah ke POST logout)
-document.getElementById('logoutBtn').addEventListener('click', () => {
+document.getElementById('logoutBtn')?.addEventListener('click', () => {
   showAlert({
     type: 'confirm',
     title: 'LOGOUT',
@@ -362,107 +256,10 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
   });
 });
 
-// Load History Function
-async function loadHistory(status = '') {
-  const historyContainer = document.getElementById('historyContainer')
-  historyContainer.innerHTML = '<div class="loading-text">LOADING HISTORY...</div>'
-  
-  try {
-    // Build URL with status filter
-    let url = '/api/history';
-    if (status) {
-      url += `?status=${status}`;
-    }
-    
-    const response = await fetch(url, {
-      headers: {
-        'x-password': historyPassword
-      }
-    })
-    
-    if (response.status === 401) {
-      // Password expired or invalid
-      sessionStorage.removeItem('historyPassword')
-      historyPassword = null
-      checkHistoryAuth()
-      return
-    }
-    
-    if (!response.ok) {
-      throw new Error('Failed to load history')
-    }
-    
-    const data = await response.json()
-    
-    if (data.reports && data.reports.length > 0) {
-      historyContainer.innerHTML = data.reports.map(report => {
-        // Status color
-        const statusColors = {
-          'baru': '#a5b4fc',
-          'diproses': '#fbbf24',
-          'selesai': '#86efac'
-        };
-        const statusColor = statusColors[report.status] || '#60a5fa';
-        
-        return `
-        <div class="history-item">
-          <div class="history-item-header">
-            <span class="history-type">${(report.type || 'UNKNOWN').toUpperCase()}</span>
-            <span class="history-date">${report.createdAt ? new Date(report.createdAt).toLocaleDateString('id-ID', { 
-              day: '2-digit', 
-              month: 'short', 
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            }) : 'N/A'}</span>
-          </div>
-          <div class="history-body">
-            <div style="margin-bottom: 6px;">
-              <span style="background: ${statusColor}22; border: 1px solid ${statusColor}; color: ${statusColor}; padding: 2px 6px; font-size: 7px; border-radius: 3px;">
-                ${(report.status || 'baru').toUpperCase()}
-              </span>
-            </div>
-            <div style="margin-bottom: 4px;"><strong>NAMA:</strong> ${report.name || 'N/A'}</div>
-            <div style="margin-bottom: 4px;"><strong>USER ID:</strong> ${report.userid || 'N/A'}</div>
-            <div style="margin-bottom: 4px;"><strong>PESAN:</strong></div>
-            <div style="color: #60a5fa;">${report.message || 'No message'}</div>
-            ${report.fileName ? `<div style="margin-top: 6px; color: #86efac; font-size: 7px;">📎 ${report.fileName}</div>` : ''}
-          </div>
-        </div>
-      `}).join('')
-    } else {
-      historyContainer.innerHTML = `
-        <div class="empty-history">
-          <div style="font-size: 24px; margin-bottom: 10px;">📭</div>
-          <div>BELUM ADA HISTORY</div>
-        </div>
-      `
-    }
-  } catch (error) {
-    console.error('Error loading history:', error)
-    historyContainer.innerHTML = `
-      <div class="empty-history">
-        <div style="font-size: 24px; margin-bottom: 10px;">⚠️</div>
-        <div>GAGAL MEMUAT HISTORY</div>
-        <div style="color: #fca5a5; margin-top: 8px; font-size: 7px;">${error.message}</div>
-      </div>
-    `
-  }
-}
+document.getElementById('statusFilter')?.addEventListener('change', (e) => {
+  loadHistory(e.target.value);
+});
 
-// Status filter event listener
-document.addEventListener('DOMContentLoaded', () => {
-  const statusFilter = document.getElementById('statusFilter')
-  if (statusFilter) {
-    statusFilter.addEventListener('change', (e) => {
-      playBeep(600, 50)
-      loadHistory(e.target.value)
-    })
-  }
-})
-
-
-// 8-bit sound effects (optional - menggunakan Web Audio API)
 const audioContext = new (window.AudioContext || window.webkitAudioContext)()
 
 function playBeep(frequency = 440, duration = 100) {
@@ -473,7 +270,7 @@ function playBeep(frequency = 440, duration = 100) {
   gainNode.connect(audioContext.destination)
   
   oscillator.frequency.value = frequency
-  oscillator.type = 'square' // 8-bit sound
+  oscillator.type = 'square'
   
   gainNode.gain.setValueAtTime(0.1, audioContext.currentTime)
   gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration / 1000)
@@ -482,27 +279,20 @@ function playBeep(frequency = 440, duration = 100) {
   oscillator.stop(audioContext.currentTime + duration / 1000)
 }
 
-// Preview file dengan retro style
 fileInput.onchange = () => {
   const file = fileInput.files[0]
   if (!file) return
 
-  // Sound effect
   playBeep(600, 50)
 
-  // Validasi ukuran file
   const fileSizeMB = file.size / 1024 / 1024;
   const isVideo = file.type.startsWith('video');
   
-  // Hard limit 20MB
-  if (file.size > 5 * 1024 * 1024) {
+  if (file.size > 20 * 1024 * 1024) {
     showAlert({
       type: 'error',
       title: 'FILE TOO LARGE',
-      message: `File size: ${fileSizeMB.toFixed(2)}MB. Maximum is 20MB. Please compress your ${isVideo ? 'video' : 'file'} first using online tools like:
-• cloudconvert.com
-• freeconvert.com
-• youcompress.com`,
+      message: `File size: ${fileSizeMB.toFixed(2)}MB. Maximum is 20MB.`,
       icon: '❌'
     });
     playBeep(200, 200)
@@ -510,12 +300,11 @@ fileInput.onchange = () => {
     return
   }
   
-  // Warning for large videos (> 10MB)
   if (isVideo && file.size > 10 * 1024 * 1024) {
     showAlert({
       type: 'warning',
       title: 'LARGE VIDEO',
-      message: `Video size: ${fileSizeMB.toFixed(2)}MB. Upload may take longer. Consider compressing for faster upload.`,
+      message: `Video size: ${fileSizeMB.toFixed(2)}MB. Upload may take longer.`,
       icon: '⚠️'
     });
   }
@@ -524,7 +313,6 @@ fileInput.onchange = () => {
   preview.style.display = 'block'
   fileLabel.innerHTML = `▶ ${file.name.toUpperCase()}`
 
-  // Tambah tombol hapus preview
   const removeBtn = document.createElement('button')
   removeBtn.className = 'remove-preview'
   removeBtn.innerHTML = '×'
@@ -538,41 +326,30 @@ fileInput.onchange = () => {
   }
   preview.appendChild(removeBtn)
 
-  // Buat URL object dengan optimasi
   const objectUrl = URL.createObjectURL(file)
 
   if (file.type.startsWith('image')) {
     const img = new Image()
-    img.onload = () => {
-      URL.revokeObjectURL(objectUrl)
-    }
+    img.onload = () => URL.revokeObjectURL(objectUrl)
     img.src = objectUrl
     img.style.maxHeight = '240px'
     img.style.objectFit = 'contain'
     preview.appendChild(img)
-
   } else if (file.type.startsWith('video')) {
     const video = document.createElement('video')
     video.preload = 'metadata'
     video.controls = true
     video.style.maxHeight = '240px'
     video.style.objectFit = 'contain'
-    
-    video.onloadedmetadata = () => {
-      URL.revokeObjectURL(objectUrl)
-    }
-    
+    video.onloadedmetadata = () => URL.revokeObjectURL(objectUrl)
     video.src = objectUrl
     preview.appendChild(video)
-    
-    // Show file size info
+
     const sizeInfo = document.createElement('div')
     sizeInfo.style.cssText = 'padding: 8px; margin-top: 8px; background: rgba(91, 141, 239, 0.1); border: 2px solid #5b8def; font-size: 7px; color: #7dd3fc; text-align: center;'
     sizeInfo.innerHTML = `📹 VIDEO SIZE: ${fileSizeMB.toFixed(2)}MB / 20MB MAX`
     preview.appendChild(sizeInfo)
-    
   } else {
-    // Untuk file lain, tampilkan info
     const fileInfo = document.createElement('div')
     fileInfo.style.padding = '20px'
     fileInfo.style.textAlign = 'center'
@@ -586,12 +363,10 @@ fileInput.onchange = () => {
   }
 }
 
-// Fungsi untuk menampilkan status dengan retro style
 function showStatus(message, type = 'info') {
   statusDiv.textContent = message.toUpperCase()
   statusDiv.className = `status ${type}`
   
-  // Sound effects
   if (type === 'success') {
     playBeep(800, 50)
     setTimeout(() => playBeep(1000, 50), 100)
@@ -608,7 +383,6 @@ function showStatus(message, type = 'info') {
   }, 5000)
 }
 
-// Submit form dengan retro loading
 form.onsubmit = async (e) => {
   e.preventDefault()
   
@@ -616,7 +390,6 @@ form.onsubmit = async (e) => {
   const userid = document.getElementById('userid').value.trim()
   const message = document.getElementById('message').value.trim()
 
-  // Validasi input dengan custom alert
   if (!name) {
     showAlert({
       type: 'warning',
@@ -650,7 +423,6 @@ form.onsubmit = async (e) => {
     return
   }
 
-  // Confirmation dialog sebelum kirim
   showAlert({
     type: 'confirm',
     title: 'CONFIRM',
@@ -659,10 +431,8 @@ form.onsubmit = async (e) => {
     confirmText: 'KIRIM',
     cancelText: 'BATAL',
     onConfirm: async () => {
-      // Proses pengiriman
       btn.disabled = true
       
-      // Animasi loading retro
       let loadingDots = 0
       const loadingText = ['SENDING', 'SENDING.', 'SENDING..', 'SENDING...']
       const loadingInterval = setInterval(() => {
@@ -687,12 +457,10 @@ form.onsubmit = async (e) => {
         if (json.status) {
           showStatus('✓ PESAN BERHASIL TERKIRIM!', 'success')
           
-          // Victory sound
           playBeep(600, 100)
           setTimeout(() => playBeep(800, 100), 100)
           setTimeout(() => playBeep(1000, 200), 200)
           
-          // Success alert
           showAlert({
             type: 'success',
             title: 'SUCCESS',
@@ -737,13 +505,11 @@ form.onsubmit = async (e) => {
       }
     },
     onCancel: () => {
-      // User cancelled
       showStatus('', '')
     }
   })
 }
 
-// Tambah validasi real-time dengan sound
 document.getElementById('name').addEventListener('input', function() {
   this.value = this.value.substring(0, 100)
 })
@@ -756,7 +522,6 @@ document.getElementById('message').addEventListener('input', function() {
   this.value = this.value.substring(0, 2000)
 })
 
-// Sound effect saat focus input
 const inputs = document.querySelectorAll('input, textarea, select')
 inputs.forEach(input => {
   input.addEventListener('focus', () => {
@@ -764,7 +529,6 @@ inputs.forEach(input => {
   })
 })
 
-// Easter egg: konami code
 let konamiCode = []
 const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a']
 
@@ -773,7 +537,6 @@ document.addEventListener('keydown', (e) => {
   konamiCode = konamiCode.slice(-10)
   
   if (konamiCode.join(',') === konamiSequence.join(',')) {
-    // Secret retro animation
     document.body.style.animation = 'none'
     document.body.style.background = 'linear-gradient(45deg, #f472b6, #5b8def, #a5b4fc, #f472b6)'
     document.body.style.backgroundSize = '400% 400%'
@@ -788,6 +551,7 @@ document.addEventListener('keydown', (e) => {
       }
     `
     document.head.appendChild(style)
+    
     playBeep(523, 150)
     setTimeout(() => playBeep(659, 150), 150)
     setTimeout(() => playBeep(784, 150), 300)
