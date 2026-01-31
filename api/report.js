@@ -24,14 +24,37 @@ export default async function handler(req, res) {
 
   await dbConnect();
 
-  const form = formidable({
+ const form = formidable({
   multiples: false,
   maxFileSize: 50 * 1024 * 1024,
   keepExtensions: true,
   allowEmptyFiles: true,
   minFileSize: 0,
-  filter: ({ name, originalFilename, mimetype }) => {
-    return mimetype && (mimetype.startsWith('image/') || mimetype.startsWith('video/'));
+  filter: function ({ name, originalFilename, mimetype }) {
+    if (name !== 'file') return true;
+
+    // Daftar MIME types yang diizinkan
+    const allowedMimeTypes = [
+      'image/jpeg',
+      'image/png',
+      'image/gif',
+      'image/webp',
+      'image/svg+xml',
+	  'image/heic',
+
+      'video/mp4',
+      'video/webm',
+      'video/quicktime',
+      'video/x-msvideo', 
+
+      'application/javascript',
+      'text/javascript',
+    ];
+    if (mimetype && allowedMimeTypes.includes(mimetype)) {
+      return true;
+    }
+
+    return false;
   },
 });
 
