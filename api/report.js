@@ -102,7 +102,6 @@ export default async function handler(req, res) {
                     `Waktu  : ${time}\n\n` +
                     `Pesan:\n${message}`;
     if (files.file) {
-  if (files.file) {
   const file = Array.isArray(files.file) ? files.file[0] : files.file;
 
   if (file?.filepath) {
