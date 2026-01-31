@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Request & Report</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
   <style>
     * {
@@ -859,115 +859,199 @@ a, button, input, select, label {
 
 <div class="scanline"></div>
 
+<!-- Sidebar Toggle Button -->
 <button class="sidebar-toggle" id="sidebarToggle">☰</button>
 
+<!-- Sidebar -->
 <div class="sidebar" id="sidebar">
   <div class="sidebar-header">
     <h2>MENU</h2>
     <button class="sidebar-close" id="sidebarClose">×</button>
   </div>
+  
   <nav class="sidebar-nav">
-    <a href="#" class="nav-item active" data-page="form"><span class="nav-icon">📝</span><span class="nav-text">FORM</span></a>
-    <a href="#" class="nav-item" data-page="history"><span class="nav-icon">📜</span><span class="nav-text">HISTORY</span></a>
-    <a href="#" class="nav-item" data-page="contact"><span class="nav-icon">📞</span><span class="nav-text">CONTACT</span></a>
+    <a href="#" class="nav-item active" data-page="form">
+      <span class="nav-icon">📝</span>
+      <span class="nav-text">FORM</span>
+    </a>
+    <a href="#" class="nav-item" data-page="history">
+      <span class="nav-icon">📜</span>
+      <span class="nav-text">HISTORY</span>
+    </a>
+    <a href="#" class="nav-item" data-page="contact">
+      <span class="nav-icon">📞</span>
+      <span class="nav-text">CONTACT</span>
+    </a>
   </nav>
+  
   <div class="sidebar-footer">
-    <div style="font-size:7px;color:#1e3a5f">v1.0 RETRO</div>
+    <div style="font-size: 7px; color: #1e3a5f;">v1.0 RETRO</div>
   </div>
 </div>
 
+<!-- Overlay -->
 <div class="overlay" id="overlay"></div>
 
+<!-- Main Content -->
 <div class="main-content">
 
+<!-- Form Page -->
 <form class="card page-content active" id="formPage" enctype="multipart/form-data">
+
   <h1>⚡ REQUEST / REPORT ⚡</h1>
   <div class="subtitle">[ KIRIM MASUKAN KE OWNER ]</div>
+
   <label>▸ JENIS</label>
   <select id="type" name="type">
     <option value="Request">REQUEST</option>
     <option value="Report">REPORT</option>
   </select>
+
   <label>▸ NAMA</label>
-  <input type="text" id="name" name="name" placeholder="NAMA KAMU..." required autocomplete="name">
+  <input
+    type="text"
+    id="name"
+    name="name"
+    placeholder="NAMA KAMU..."
+    required
+    autocomplete="name"
+  >
+
   <label>▸ USER ID</label>
-  <input type="text" id="userid" name="userid" placeholder="ID AKUN / USER..." required autocomplete="username">
+  <input
+    type="text"
+    id="userid"
+    name="userid"
+    placeholder="ID AKUN / USER..."
+    required
+    autocomplete="username"
+  >
+
   <label>▸ PESAN</label>
-  <textarea id="message" name="message" placeholder="TULIS PESAN DI SINI..." required></textarea>
-  <label>▸ FILE <span style="color:#1e3a5f">(OPTIONAL)</span></label>
+  <textarea
+    id="message"
+    name="message"
+    placeholder="TULIS PESAN DI SINI..."
+    required
+  ></textarea>
+
+  <label>▸ FILE <span style="color: #1e3a5f;">(OPTIONAL)</span></label>
   <div class="file-box" onclick="document.getElementById('fileInput').click()">
     <span id="fileLabel">▶ KLIK UNTUK UPLOAD</span>
-    <small>MAX 50MB</small>
+    <small>MAX 20MB</small>
   </div>
-  <input type="file" id="fileInput" name="file" accept="image/jpeg,image/png,image/gif,image/webp,image/heic,image/svg+xml,video/mp4,video/webm,video/quicktime,.js" hidden>
+
+  <input
+    type="file"
+    id="fileInput"
+    name="file"
+    accept="image/jpeg,image/png,image/gif,image/webp,image/heic,image/svg+xml,video/mp4,video/webm,video/quicktime,.js"
+    hidden
+  >
+
   <div class="preview" id="preview"></div>
+
   <div class="status" id="status"></div>
-  <button type="submit" id="send"><span class="blink">▸</span> KIRIM <span class="blink">◂</span></button>
+
+  <button type="submit" id="send">
+    <span class="blink">▸</span> KIRIM <span class="blink">◂</span>
+  </button>
+
 </form>
 
+<!-- History Page -->
 <div class="card page-content" id="historyPage">
-  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-    <h1 style="margin:0">📜 HISTORY</h1>
-    <button id="logoutBtn" style="display:none;padding:6px 12px;font-size:7px;min-width:auto;background:#7f1d1d;border-color:#fca5a5;color:#fca5a5">🔓 LOGOUT</button>
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+    <h1 style="margin: 0;">📜 HISTORY</h1>
+    <button id="logoutBtn" style="display: none; padding: 6px 12px; font-size: 7px; min-width: auto; background: #7f1d1d; border-color: #fca5a5; color: #fca5a5;">
+      🔓 LOGOUT
+    </button>
   </div>
   <div class="subtitle">[ RIWAYAT PESAN TERKIRIM ]</div>
+  
+  <!-- Password Modal -->
   <div class="password-modal" id="passwordModal">
     <div class="password-content">
-      <h3 style="font-size:12px;color:#7dd3fc;margin-bottom:16px;text-align:center">🔒 AUTHENTICATION</h3>
-      <label style="font-size:9px;color:#60a5fa;margin-bottom:6px;display:block">ENTER PASSWORD</label>
-      <input type="password" id="historyPassword" placeholder="PASSWORD..." style="width:100%;background:#0f1629;border:3px solid #1e3a5f;color:#7dd3fc;padding:10px;font-family:'Press Start 2P',cursive;font-size:10px;margin-bottom:12px">
-      <button id="submitPassword" style="width:100%;padding:10px;font-size:10px"><span class="blink">▸</span> UNLOCK <span class="blink">◂</span></button>
-      <div id="passwordError" style="color:#fca5a5;font-size:8px;text-align:center;margin-top:8px;min-height:16px"></div>
+      <h3 style="font-size: 12px; color: #7dd3fc; margin-bottom: 16px; text-align: center;">🔒 AUTHENTICATION</h3>
+      <label style="font-size: 9px; color: #60a5fa; margin-bottom: 6px; display: block;">ENTER PASSWORD</label>
+      <input 
+        type="password" 
+        id="historyPassword" 
+        placeholder="PASSWORD..."
+        style="width: 100%; background: #0f1629; border: 3px solid #1e3a5f; color: #7dd3fc; padding: 10px; font-family: 'Press Start 2P', cursive; font-size: 10px; margin-bottom: 12px;"
+      >
+      <button id="submitPassword" style="width: 100%; padding: 10px; font-size: 10px;">
+        <span class="blink">▸</span> UNLOCK <span class="blink">◂</span>
+      </button>
+      <div id="passwordError" style="color: #fca5a5; font-size: 8px; text-align: center; margin-top: 8px; min-height: 16px;"></div>
     </div>
   </div>
-  <div style="margin-bottom:16px;display:none" id="filterSection">
-    <label style="font-size:9px;color:#60a5fa;margin-bottom:6px;display:block">FILTER STATUS</label>
-    <select id="statusFilter" style="width:100%;background:#0f1629;border:3px solid #1e3a5f;color:#7dd3fc;padding:8px;font-family:'Press Start 2P',cursive;font-size:8px">
+  
+  <div style="margin-bottom: 16px; display: none;" id="filterSection">
+    <label style="font-size: 9px; color: #60a5fa; margin-bottom: 6px; display: block;">FILTER STATUS</label>
+    <select id="statusFilter" style="width: 100%; background: #0f1629; border: 3px solid #1e3a5f; color: #7dd3fc; padding: 8px; font-family: 'Press Start 2P', cursive; font-size: 8px;">
       <option value="">SEMUA</option>
       <option value="baru">BARU</option>
       <option value="diproses">DIPROSES</option>
       <option value="selesai">SELESAI</option>
     </select>
   </div>
-  <div class="history-container" id="historyContainer" style="display:none">
+  
+  <div class="history-container" id="historyContainer" style="display: none;">
     <div class="loading-text">LOADING HISTORY...</div>
   </div>
 </div>
 
+<!-- Contact Page -->
 <div class="card page-content" id="contactPage">
   <h1>📞 CONTACT</h1>
   <div class="subtitle">[ HUBUNGI KAMI ]</div>
+  
   <div class="contact-container">
     <div class="contact-item">
       <div class="contact-icon">📱</div>
       <div class="contact-label">TELEGRAM OWNER</div>
-      <a href="https://t.me/username" target="_blank" class="contact-link">@YourUsername</a>
+      <a href="https://t.me/username" target="_blank" class="contact-link">
+        @YourUsername
+      </a>
     </div>
+    
     <div class="contact-item">
       <div class="contact-icon">👥</div>
       <div class="contact-label">TELEGRAM GROUP</div>
-      <a href="https://t.me/yourgroup" target="_blank" class="contact-link">@YourGroup</a>
+      <a href="https://t.me/yourgroup" target="_blank" class="contact-link">
+        @YourGroup
+      </a>
     </div>
+    
     <div class="contact-item">
       <div class="contact-icon">💻</div>
       <div class="contact-label">GITHUB REPOSITORY</div>
-      <a href="https://github.com/yourusername/yourrepo" target="_blank" class="contact-link">github.com/yourrepo</a>
+      <a href="https://github.com/yourusername/yourrepo" target="_blank" class="contact-link">
+        github.com/yourrepo
+      </a>
     </div>
   </div>
+  
   <div class="contact-footer">
-    <p style="font-size:8px;color:#60a5fa;text-align:center;margin-top:20px">FEEL FREE TO REACH OUT! 🚀</p>
+    <p style="font-size: 8px; color: #60a5fa; text-align: center; margin-top: 20px;">
+      FEEL FREE TO REACH OUT! 🚀
+    </p>
   </div>
 </div>
 
 </div>
 
+<!-- Custom Alert Popup -->
 <div class="alert-overlay" id="alertOverlay">
   <div class="alert-box">
     <div class="alert-header">
       <span class="alert-icon" id="alertIcon">ℹ️</span>
       <h3 class="alert-title" id="alertTitle">INFO</h3>
     </div>
-    <div class="alert-message" id="alertMessage">This is a message</div>
+    <div class="alert-message" id="alertMessage">
+      This is a message
+    </div>
     <div class="alert-buttons" id="alertButtons">
       <button class="alert-btn primary" id="alertOk">OK</button>
     </div>
