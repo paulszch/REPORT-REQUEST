@@ -145,22 +145,30 @@ document.getElementById('submitPassword')?.addEventListener('click', async () =>
 
 async function loadHistory(status = '') {
   const container = document.getElementById('historyContainer')
-  container.innerHTML = '<div class="loading-text">MEMUAT HISTORY...</div>'
+  if (!container) {
+    console.error('History container TIDAK DITEMUKAN!')
+    return
+  }
+  console.log('Mulai loadHistory, status:', status)
+  container.innerHTML = '<div class="loading-text">MEMUAT HISTORY... (debug active)</div>'
   try {
     let url = '/api/history'
     if (status) url += `?status=${status}`
+    console.log('Fetch ke:', url)
     const res = await fetch(url)
+    console.log('Fetch selesai, status code:', res.status)
     if (res.status === 401) {
+      console.log('401 - kembali ke modal')
       document.getElementById('passwordModal').style.display = 'block'
-      container.innerHTML = '<div class="empty-history">SILAKAN MASUKKAN PASSWORD ULANG</div>'
+      container.innerHTML = '<div class="empty-history">PASSWORD DIBUTUHKAN ULANG</div>'
       return
     }
-    if (!res.ok) throw new Error('Gagal load: ' + res.status)
+    if (!res.ok) {
+      const text = await res.text()
+      throw new Error(`Gagal: ${res.status} - ${text}`)
+    }
     const data = await res.json()
-    if (data.status === false) {
-      container.innerHTML = '<div class="empty-history">ERROR SERVER<br>' + (data.message || 'Tidak diketahui') + '</div>'
-      return
-    }
+    console.log('Data API:', data)
     if (data.reports?.length > 0) {
       container.innerHTML = data.reports.map(report => {
         const statusColors = {'baru':'#a5b4fc','diproses':'#fbbf24','selesai':'#86efac'}
@@ -190,6 +198,7 @@ async function loadHistory(status = '') {
       container.innerHTML = '<div class="empty-history">BELUM ADA HISTORY</div>'
     }
   } catch (err) {
+    console.error('ERROR LOAD HISTORY:', err)
     container.innerHTML = `<div class="empty-history">GAGAL MEMUAT<br>${err.message}</div>`
   }
 }
@@ -233,13 +242,13 @@ fileInput.onchange = () => {
   playBeep(600, 50)
   const fileSizeMB = file.size / 1024 / 1024
   const isVideo = file.type.startsWith('video')
-  if (file.size > 20 * 1024 * 1024) {
-    showAlert({type: 'error', title: 'FILE TOO LARGE', message: `File size: ${fileSizeMB.toFixed(2)}MB. Maximum is 20MB.`, icon: '❌'})
+  if (file.size > 5 * 1024 * 1024) {
+    showAlert({type: 'error', title: 'FILE TOO LARGE', message: `File size: ${fileSizeMB.toFixed(2)}MB. Maximum is 5MB.`, icon: '❌'})
     playBeep(200, 200)
     fileInput.value = ''
     return
   }
-  if (isVideo && file.size > 10 * 1024 * 1024) {
+  if (isVideo && file.size > 3 * 1024 * 1024) {
     showAlert({type: 'warning', title: 'LARGE VIDEO', message: `Video size: ${fileSizeMB.toFixed(2)}MB. Upload may take longer.`, icon: '⚠️'})
   }
   preview.innerHTML = ''
@@ -276,7 +285,7 @@ fileInput.onchange = () => {
     preview.appendChild(video)
     const sizeInfo = document.createElement('div')
     sizeInfo.style.cssText = 'padding:8px;margin-top:8px;background:rgba(91,141,239,0.1);border:2px solid #5b8def;font-size:7px;color:#7dd3fc;text-align:center'
-    sizeInfo.innerHTML = `📹 VIDEO SIZE: ${fileSizeMB.toFixed(2)}MB / 20MB MAX`
+    sizeInfo.innerHTML = `📹 VIDEO SIZE: ${fileSizeMB.toFixed(2)}MB / 5MB MAX`
     preview.appendChild(sizeInfo)
   } else {
     const fileInfo = document.createElement('div')
@@ -396,3 +405,12 @@ document.addEventListener('keydown', e => {
 
 console.log('%c▸ REQ & REPORT BY FILNZ ◂', 'color:#7dd3fc;font-size:20px;font-family:monospace;text-shadow:0 0 10px #5b8def')
 console.log('%cTry the Konami Code: ↑ ↑ ↓ ↓ ← → ← → B A', 'color:#60a5fa;font-family:monospace')
+
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('Script loaded OK')
+  console.log('History container exists?', document.getElementById('historyContainer') !== null)
+  if (document.getElementById('historyPage').classList.contains('active')) {
+    console.log('Page history active - force load')
+    loadHistory()
+  }
+})
