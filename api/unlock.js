@@ -3,7 +3,7 @@ import { serialize } from 'cookie';
 
 const HISTORY_PASSWORD = process.env.HISTORY_PASSWORD;
 
-const activeTokens = new Map();
+export const activeTokens = new Map();
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
