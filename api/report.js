@@ -3,8 +3,8 @@ import formidable from 'formidable';
 import fs from 'fs/promises'; 
 import TelegramBot from 'node-telegram-bot-api';
 import moment from 'moment-timezone';
-import dbConnect from '../lib/dbConnect';
-import Report from '../models/Report';
+import dbConnect from '../lib/dbConnect.js';
+import Report from '../models/Report.js';
 
 export const config = {
   api: {
