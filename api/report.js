@@ -4,6 +4,7 @@ import fs from 'fs/promises';
 import TelegramBot from 'node-telegram-bot-api';
 import moment from 'moment-timezone';
 import dbConnect from '../lib/dbConnect.js';
+import fsSync from 'fs';
 import Report from '../models/Report.js';
 
 export const config = {
@@ -124,17 +125,18 @@ export default async function handler(req, res) {
               parse_mode: 'HTML',
             });
           } else {
-            await bot.sendDocument(
-  OWNER_ID,
-  buffer,
-  {
-    caption,
-    filename: filename,
-    contentType: mime,
-    parse_mode: 'HTML',
-  }
-);
-          }
+  const stream = fsSync.createReadStream(file.filepath);
+
+  await bot.sendDocument(
+    OWNER_ID,
+    stream,
+    {
+      caption,
+      filename,
+      parse_mode: 'HTML',
+    }
+  );
+}
           telegramMediaSent = true;
         } catch (telegramErr) {
           console.error('Gagal kirim media ke Telegram:', telegramErr);
