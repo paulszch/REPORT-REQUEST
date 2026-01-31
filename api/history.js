@@ -11,17 +11,26 @@ export default async function handler(req, res) {
   try {
     await dbConnect();
 
+    // Get query parameters for pagination (optional)
     const limit = parseInt(req.query.limit) || 50;
     const skip = parseInt(req.query.skip) || 0;
+    const status = req.query.status; // Filter by status (optional)
 
-    const reports = await Report.find()
+    // Build query
+    const query = {};
+    if (status) {
+      query.status = status;
+    }
+
+    // Fetch reports from database, sorted by newest first
+    const reports = await Report.find(query)
       .sort({ createdAt: -1 })
       .limit(limit)
       .skip(skip)
-      .select('-__v')
-      .lean();
+      .select('-__v') // Exclude version field
+      .lean(); // Convert to plain JavaScript objects
 
-    const total = await Report.countDocuments();
+    const total = await Report.countDocuments(query);
 
     return res.status(200).json({
       status: true,
