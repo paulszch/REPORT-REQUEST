@@ -405,7 +405,7 @@ fileInput.onchange = () => {
   playBeep(600, 50)
 
   // Validasi ukuran file (50MB)
-  if (file.size > 50 * 1024 * 1024) {
+  if (file.size > 20 * 1024 * 1024) {
     showStatus('FILE TERLALU BESAR (MAX 50MB)', 'error')
     playBeep(200, 200)
     fileInput.value = ''
