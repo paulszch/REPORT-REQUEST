@@ -126,16 +126,14 @@ export default async function handler(req, res) {
           } else {
             await bot.sendDocument(
   OWNER_ID,
+  buffer,
   {
-    value: buffer,
+    caption,
     filename: filename,
     contentType: mime,
-              },
-              {
-                caption,
-                parse_mode: 'HTML',
-              }
-            );
+    parse_mode: 'HTML',
+  }
+);
           }
           telegramMediaSent = true;
         } catch (telegramErr) {
