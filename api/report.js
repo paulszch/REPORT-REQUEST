@@ -119,42 +119,44 @@ if (file?.filepath) {
     };
 
     try {
-      if (mime.startsWith('image/')) {
-        await bot.sendPhoto(
-          OWNER_ID,
-          fsSync.createReadStream(file.filepath),
-          { caption, parse_mode: 'HTML' }
-        );
+  if (mime.startsWith('image/')) {
+    await bot.sendPhoto(
+      OWNER_ID,
+      fsSync.createReadStream(file.filepath),
+      { caption, parse_mode: 'HTML' }
+    );
 
-      } else if (mime.startsWith('video/')) {
-        await bot.sendVideo(
-          OWNER_ID,
-          fsSync.createReadStream(file.filepath),
-          {
-            caption,
-            supports_streaming: true,
-            parse_mode: 'HTML',
-          }
-        );
-
-      } else {
-        await bot.sendDocument(
-          OWNER_ID,
-          fsSync.createReadStream(file.filepath),
-          {
-            filename: file.originalFilename,
-            caption,
-            parse_mode: 'HTML',
-          }
-        );
+  } else if (mime.startsWith('video/')) {
+    await bot.sendVideo(
+      OWNER_ID,
+      fsSync.createReadStream(file.filepath),
+      {
+        caption,
+        supports_streaming: true,
+        parse_mode: 'HTML',
       }
+    );
 
-      telegramMediaSent = true;
+  } else {
+    await bot.sendDocument(
+      OWNER_ID,
+      fsSync.createReadStream(file.filepath),
+      {
+        filename: file.originalFilename,
+        contentType: mime,
+      },
+      {
+        caption,
+        parse_mode: 'HTML',
+      }
+    );
+  }
 
-    } catch (err) {
-      console.error('Telegram send error:', err);
+  telegramMediaSent = true;
 
-    } finally {
+} catch (err) {
+  console.error('Telegram send error:', err);
+} finally {
   try {
     await fs.unlink(file.filepath);
   } catch (unlinkErr) {
