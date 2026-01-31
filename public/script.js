@@ -53,13 +53,18 @@ navItems.forEach(item => {
 })
 
 // Load History Function
-async function loadHistory() {
+async function loadHistory(status = '') {
   const historyContainer = document.getElementById('historyContainer')
   historyContainer.innerHTML = '<div class="loading-text">LOADING HISTORY...</div>'
   
   try {
-    // Simulate API call - replace with actual API endpoint
-    const response = await fetch('/api/history')
+    // Build URL with status filter
+    let url = '/api/history';
+    if (status) {
+      url += `?status=${status}`;
+    }
+    
+    const response = await fetch(url)
     
     if (!response.ok) {
       throw new Error('Failed to load history')
@@ -68,21 +73,41 @@ async function loadHistory() {
     const data = await response.json()
     
     if (data.reports && data.reports.length > 0) {
-      historyContainer.innerHTML = data.reports.map(report => `
+      historyContainer.innerHTML = data.reports.map(report => {
+        // Status color
+        const statusColors = {
+          'baru': '#a5b4fc',
+          'diproses': '#fbbf24',
+          'selesai': '#86efac'
+        };
+        const statusColor = statusColors[report.status] || '#60a5fa';
+        
+        return `
         <div class="history-item">
           <div class="history-item-header">
-            <span class="history-type">${report.type.toUpperCase()}</span>
-            <span class="history-date">${new Date(report.createdAt).toLocaleDateString('id-ID')}</span>
+            <span class="history-type">${(report.type || 'UNKNOWN').toUpperCase()}</span>
+            <span class="history-date">${report.createdAt ? new Date(report.createdAt).toLocaleDateString('id-ID', { 
+              day: '2-digit', 
+              month: 'short', 
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            }) : 'N/A'}</span>
           </div>
           <div class="history-body">
-            <div style="margin-bottom: 4px;"><strong>NAMA:</strong> ${report.name}</div>
-            <div style="margin-bottom: 4px;"><strong>USER ID:</strong> ${report.userid}</div>
+            <div style="margin-bottom: 6px;">
+              <span style="background: ${statusColor}22; border: 1px solid ${statusColor}; color: ${statusColor}; padding: 2px 6px; font-size: 7px; border-radius: 3px;">
+                ${(report.status || 'baru').toUpperCase()}
+              </span>
+            </div>
+            <div style="margin-bottom: 4px;"><strong>NAMA:</strong> ${report.name || 'N/A'}</div>
+            <div style="margin-bottom: 4px;"><strong>USER ID:</strong> ${report.userid || 'N/A'}</div>
             <div style="margin-bottom: 4px;"><strong>PESAN:</strong></div>
-            <div style="color: #60a5fa;">${report.message}</div>
-            ${report.fileName ? `<div style="margin-top: 4px; color: #86efac;">📎 ${report.fileName}</div>` : ''}
+            <div style="color: #60a5fa;">${report.message || 'No message'}</div>
+            ${report.fileName ? `<div style="margin-top: 6px; color: #86efac; font-size: 7px;">📎 ${report.fileName}</div>` : ''}
           </div>
         </div>
-      `).join('')
+      `}).join('')
     } else {
       historyContainer.innerHTML = `
         <div class="empty-history">
@@ -102,6 +127,17 @@ async function loadHistory() {
     `
   }
 }
+
+// Status filter event listener
+document.addEventListener('DOMContentLoaded', () => {
+  const statusFilter = document.getElementById('statusFilter')
+  if (statusFilter) {
+    statusFilter.addEventListener('change', (e) => {
+      playBeep(600, 50)
+      loadHistory(e.target.value)
+    })
+  }
+})
 
 
 // 8-bit sound effects (optional - menggunakan Web Audio API)
