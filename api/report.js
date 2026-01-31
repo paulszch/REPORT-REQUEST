@@ -1,7 +1,7 @@
 // api/report.js
 import formidable from 'formidable';
 import fs from 'fs/promises'; 
-import TelegramBot from 'node-telegram-bot-api';
+import { Telegraf } from 'telegraf';
 import moment from 'moment-timezone';
 import dbConnect from '../lib/dbConnect.js';
 import fsSync from 'fs';
@@ -13,7 +13,7 @@ export const config = {
   },
 };
 
-const bot = new TelegramBot(process.env.BOT_TOKEN);
+const bot = new Telegraf(process.env.BOT_TOKEN);
 const OWNER_ID = process.env.OWNER_ID;
 const TIMEZONE = 'Asia/Jakarta';
 
@@ -25,55 +25,54 @@ export default async function handler(req, res) {
 
   await dbConnect();
 
- const form = formidable({
-  multiples: false,
-  maxFileSize: 50 * 1024 * 1024,
-  keepExtensions: true,
-  allowEmptyFiles: true,
-  minFileSize: 0,
-  filter: ({ name, originalFilename, mimetype }) => {
-  if (name !== 'file') return true;
+  const form = formidable({
+    multiples: false,
+    maxFileSize: 50 * 1024 * 1024,
+    keepExtensions: true,
+    allowEmptyFiles: true,
+    minFileSize: 0,
+    filter: ({ name, originalFilename, mimetype }) => {
+      if (name !== 'file') return true;
 
-  const allowedMimeTypes = [
-    'image/jpeg',
-    'image/png',
-    'image/gif',
-    'image/webp',
-    'image/svg+xml',
-    'image/heic',
+      const allowedMimeTypes = [
+        'image/jpeg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+        'image/svg+xml',
+        'image/heic',
 
-    'video/mp4',
-    'video/webm',
-    'video/quicktime',
-    'video/x-msvideo',
+        'video/mp4',
+        'video/webm',
+        'video/quicktime',
+        'video/x-msvideo',
 
-    'application/javascript',
-    'text/javascript',
-    'application/octet-stream',
-    'text/plain',
-  ];
+        'application/javascript',
+        'text/javascript',
+        'application/octet-stream',
+        'text/plain',
+      ];
 
-  const allowedExtensions = [
-    '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.heic',
-    '.mp4', '.webm', '.mov', '.avi',
-    '.js',
-  ];
+      const allowedExtensions = [
+        '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.heic',
+        '.mp4', '.webm', '.mov', '.avi',
+        '.js',
+      ];
 
-  const ext = originalFilename
-    ? originalFilename.toLowerCase().slice(originalFilename.lastIndexOf('.'))
-    : '';
+      const ext = originalFilename
+        ? originalFilename.toLowerCase().slice(originalFilename.lastIndexOf('.'))
+        : '';
 
-  if (
-    (mimetype && allowedMimeTypes.includes(mimetype)) ||
-    allowedExtensions.includes(ext)
-  ) {
-    return true;
-  }
+      if (
+        (mimetype && allowedMimeTypes.includes(mimetype)) ||
+        allowedExtensions.includes(ext)
+      ) {
+        return true;
+      }
 
-  return false;
-},
-
-});
+      return false;
+    },
+  });
 
   try {
     const [fields, files] = await form.parse(req);
@@ -101,74 +100,73 @@ export default async function handler(req, res) {
                     `ID     : ${userid}\n` +
                     `Waktu  : ${time}\n\n` +
                     `Pesan:\n${message}`;
+
     if (files.file) {
-  const file = Array.isArray(files.file) ? files.file[0] : files.file;
+      const file = Array.isArray(files.file) ? files.file[0] : files.file;
 
-if (file?.filepath) {
-  console.log('File info:', {
-    originalFilename: file.originalFilename,
-    mimetype: file.mimetype,
-    filepath: file.filepath,
-    size: file.size
-  });
-    const mime = file.mimetype || 'application/octet-stream';
+      if (file?.filepath) {
+        const mime = file.mimetype || 'application/octet-stream';
 
-    fileInfo = {
-      fileName: file.originalFilename,
-      fileType: mime,
-    };
+        console.log('File info:', {
+          originalFilename: file.originalFilename,
+          mimetype: file.mimetype,
+          filepath: file.filepath,
+          size: file.size
+        });
 
-    try {
-  if (mime.startsWith('image/')) {
-    await bot.sendPhoto(
-      OWNER_ID,
-      fsSync.createReadStream(file.filepath),
-      { caption, parse_mode: 'HTML' }
-    );
+        fileInfo = {
+          fileName: file.originalFilename,
+          fileType: mime,
+        };
 
-  } else if (mime.startsWith('video/')) {
-    await bot.sendVideo(
-      OWNER_ID,
-      fsSync.createReadStream(file.filepath),
-      {
-        caption,
-        supports_streaming: true,
-        parse_mode: 'HTML',
+        try {
+          if (mime.startsWith('image/')) {
+            await bot.telegram.sendPhoto(
+              OWNER_ID,
+              { source: fsSync.createReadStream(file.filepath) },
+              { caption, parse_mode: 'HTML' }
+            );
+
+          } else if (mime.startsWith('video/')) {
+            await bot.telegram.sendVideo(
+              OWNER_ID,
+              { source: fsSync.createReadStream(file.filepath) },
+              { 
+                caption,
+                supports_streaming: true,
+                parse_mode: 'HTML',
+              }
+            );
+
+          } else {
+            await bot.telegram.sendDocument(
+              OWNER_ID,
+              { 
+                source: fsSync.createReadStream(file.filepath),
+                filename: file.originalFilename,
+              },
+              { 
+                caption,
+                parse_mode: 'HTML',
+              }
+            );
+          }
+
+          telegramMediaSent = true;
+
+        } catch (err) {
+          console.error('Telegram send error:', err);
+
+        } finally {
+          try {
+            await fs.unlink(file.filepath);
+          } catch (unlinkErr) {
+            // Ignore error saat hapus file
+          }
+        }
       }
-    );
-
- } else {
-  const fileBuffer = fsSync.readFileSync(file.filepath);
-  
-  await bot.sendDocument(
-    OWNER_ID,
-    fileBuffer,
-    {
-      filename: file.originalFilename,
-      contentType: mime,
-    },
-    {
-      caption,
-      parse_mode: 'HTML',
     }
-  );
-}
 
-  telegramMediaSent = true;
-
-} catch (err) {
-  console.error('Telegram send error:', err);
-} finally {
-  try {
-    await fs.unlink(file.filepath);
-  } catch (unlinkErr) {
-    // Ignore error saat hapus file
-  }
-}
-  }
-}
-
-    
     const newReport = await Report.create({
       type,
       name,
@@ -178,13 +176,13 @@ if (file?.filepath) {
     });
 
     if (!telegramMediaSent) {
-      await bot.sendMessage(OWNER_ID, caption, { parse_mode: 'HTML' });
+      await bot.telegram.sendMessage(OWNER_ID, caption, { parse_mode: 'HTML' });
     }
 
     return res.status(200).json({
       status: true,
       message: 'Pesan berhasil dikirim & disimpan',
-      reportId: newReport._id, // optional: balikin ID report
+      reportId: newReport._id,
     });
 
   } catch (error) {
