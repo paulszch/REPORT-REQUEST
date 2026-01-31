@@ -125,18 +125,18 @@ export default async function handler(req, res) {
               parse_mode: 'HTML',
             });
           } else {
-  const stream = fsSync.createReadStream(file.filepath);
-
   await bot.sendDocument(
-    OWNER_ID,
-    stream,
-    {
-      caption,
-      filename,
-      parse_mode: 'HTML',
-    }
-  );
-}
+  OWNER_ID,
+  {
+    source: fsSync.createReadStream(file.filepath),
+    filename: file.originalFilename,
+    contentType: file.mimetype || 'application/octet-stream',
+  },
+  {
+    caption,
+    parse_mode: 'HTML',
+  }
+);
           telegramMediaSent = true;
         } catch (telegramErr) {
           console.error('Gagal kirim media ke Telegram:', telegramErr);
