@@ -102,55 +102,57 @@ export default async function handler(req, res) {
                     `Waktu  : ${time}\n\n` +
                     `Pesan:\n${message}`;
     if (files.file) {
-      const file = Array.isArray(files.file) ? files.file[0] : files.file;
+  if (files.file) {
+  const file = Array.isArray(files.file) ? files.file[0] : files.file;
 
-      if (file?.filepath && (await fs.stat(file.filepath)).isFile()) {
-        const buffer = await fs.readFile(file.filepath);
-        const mime = file.mimetype || 'application/octet-stream';
-        const filename = file.originalFilename || 'file';
+  if (file?.filepath) {
+    const mime = file.mimetype || 'application/octet-stream';
 
-        fileInfo = {
-          fileName: filename,
-          fileType: mime,
-        };
+    fileInfo = {
+      fileName: file.originalFilename,
+      fileType: mime,
+    };
 
-        try {
-  if (mime.startsWith('image/')) {
-    await bot.sendPhoto(
-      OWNER_ID,
-      fsSync.createReadStream(file.filepath),
-      { caption, parse_mode: 'HTML' }
-    );
+    try {
+      if (mime.startsWith('image/')) {
+        await bot.sendPhoto(
+          OWNER_ID,
+          fsSync.createReadStream(file.filepath),
+          { caption, parse_mode: 'HTML' }
+        );
 
-  } else if (mime.startsWith('video/')) {
-    await bot.sendVideo(
-      OWNER_ID,
-      fsSync.createReadStream(file.filepath),
-      {
-        caption,
-        supports_streaming: true,
-        parse_mode: 'HTML',
+      } else if (mime.startsWith('video/')) {
+        await bot.sendVideo(
+          OWNER_ID,
+          fsSync.createReadStream(file.filepath),
+          {
+            caption,
+            supports_streaming: true,
+            parse_mode: 'HTML',
+          }
+        );
+
+      } else {
+        await bot.sendDocument(
+          OWNER_ID,
+          fsSync.createReadStream(file.filepath),
+          {
+            filename: file.originalFilename,
+            caption,
+            parse_mode: 'HTML',
+          }
+        );
       }
-    );
 
-  } else {
-    await bot.sendDocument(
-      OWNER_ID,
-      fsSync.createReadStream(file.filepath),
-      {
-        filename: file.originalFilename,
-        caption,
-        parse_mode: 'HTML',
-      }
-    );
+      telegramMediaSent = true;
+
+    } catch (err) {
+      console.error('Telegram send error:', err);
+
+    } finally {
+      await fs.unlink(file.filepath).catch(() => {});
+    }
   }
-
-  telegramMediaSent = true;
-
-} catch (telegramErr) {
-  console.error('Gagal kirim media ke Telegram:', telegramErr);
-} finally {
-  await fs.unlink(file.filepath).catch(() => {});
 }
 
     
