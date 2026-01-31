@@ -3,9 +3,11 @@
   "version": "1.0.0",
   "type": "module",
   "dependencies": {
+    "cookie": "^0.7.0",
     "formidable": "^3.5.1",
     "moment-timezone": "^0.5.37",
     "mongoose": "^9.1.5",
-    "telegraf": "^4.16.3"
+    "telegraf": "^4.16.3",
+    "uuid": "^13.0.0"
   }
 }
