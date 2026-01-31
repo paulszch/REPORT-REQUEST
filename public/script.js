@@ -404,12 +404,34 @@ fileInput.onchange = () => {
   // Sound effect
   playBeep(600, 50)
 
-  // Validasi ukuran file (50MB)
+  // Validasi ukuran file
+  const fileSizeMB = file.size / 1024 / 1024;
+  const isVideo = file.type.startsWith('video');
+  
+  // Hard limit 20MB
   if (file.size > 20 * 1024 * 1024) {
-    showStatus('FILE TERLALU BESAR (MAX 50MB)', 'error')
+    showAlert({
+      type: 'error',
+      title: 'FILE TOO LARGE',
+      message: `File size: ${fileSizeMB.toFixed(2)}MB. Maximum is 20MB. Please compress your ${isVideo ? 'video' : 'file'} first using online tools like:
+• cloudconvert.com
+• freeconvert.com
+• youcompress.com`,
+      icon: '❌'
+    });
     playBeep(200, 200)
     fileInput.value = ''
     return
+  }
+  
+  // Warning for large videos (> 10MB)
+  if (isVideo && file.size > 10 * 1024 * 1024) {
+    showAlert({
+      type: 'warning',
+      title: 'LARGE VIDEO',
+      message: `Video size: ${fileSizeMB.toFixed(2)}MB. Upload may take longer. Consider compressing for faster upload.`,
+      icon: '⚠️'
+    });
   }
 
   preview.innerHTML = ''
@@ -456,6 +478,13 @@ fileInput.onchange = () => {
     
     video.src = objectUrl
     preview.appendChild(video)
+    
+    // Show file size info
+    const sizeInfo = document.createElement('div')
+    sizeInfo.style.cssText = 'padding: 8px; margin-top: 8px; background: rgba(91, 141, 239, 0.1); border: 2px solid #5b8def; font-size: 7px; color: #7dd3fc; text-align: center;'
+    sizeInfo.innerHTML = `📹 VIDEO SIZE: ${fileSizeMB.toFixed(2)}MB / 20MB MAX`
+    preview.appendChild(sizeInfo)
+    
   } else {
     // Untuk file lain, tampilkan info
     const fileInfo = document.createElement('div')
