@@ -137,6 +137,7 @@ export default async function handler(req, res) {
     parse_mode: 'HTML',
   }
 );
+          }
           telegramMediaSent = true;
         } catch (telegramErr) {
           console.error('Gagal kirim media ke Telegram:', telegramErr);
