@@ -56,7 +56,7 @@ export default async function handler(req, res) {
 
     const time = moment().tz(TIMEZONE).format('DD MMM YYYY • HH:mm:ss z');
 
-    const caption = `Pesan BARU\n\n` +
+    const caption = `${type.toUpperCase()} BARU\n\n` +
                     `Nama   : ${name}\n` +
                     `ID     : ${userid}\n` +
                     `Waktu  : ${time}\n\n` +
