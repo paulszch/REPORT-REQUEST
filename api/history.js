@@ -2,10 +2,25 @@
 import dbConnect from '../lib/dbConnect.js';
 import Report from '../models/Report.js';
 
+// Simple authentication - bisa diganti dengan JWT atau session
+const HISTORY_PASSWORD = process.env.HISTORY_PASSWORD || 'owner123'; // Set di .env
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     res.setHeader('Allow', ['GET']);
     return res.status(405).json({ message: 'Method Not Allowed' });
+  }
+
+  // Check authentication
+  const authHeader = req.headers.authorization;
+  const password = req.headers['x-password'];
+  
+  if (!password || password !== HISTORY_PASSWORD) {
+    return res.status(401).json({
+      status: false,
+      message: 'Unauthorized - Password required',
+      reports: []
+    });
   }
 
   try {
