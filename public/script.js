@@ -148,23 +148,57 @@ navItems.forEach(item => {
 })
 
 // History Authentication
-let historyPassword = localStorage.getItem('historyPassword') || null;
+let historyPassword = sessionStorage.getItem('historyPassword') || null;
 
 function checkHistoryAuth() {
+  const logoutBtn = document.getElementById('logoutBtn')
+  
   if (historyPassword) {
     // Already authenticated, load history
     document.getElementById('passwordModal').style.display = 'none'
     document.getElementById('filterSection').style.display = 'block'
     document.getElementById('historyContainer').style.display = 'block'
+    if (logoutBtn) logoutBtn.style.display = 'block'
     loadHistory()
   } else {
     // Show password modal
     document.getElementById('passwordModal').style.display = 'block'
     document.getElementById('filterSection').style.display = 'none'
     document.getElementById('historyContainer').style.display = 'none'
+    if (logoutBtn) logoutBtn.style.display = 'none'
     document.getElementById('historyPassword').focus()
   }
 }
+
+// Logout Function
+document.addEventListener('DOMContentLoaded', () => {
+  const logoutBtn = document.getElementById('logoutBtn')
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      showAlert({
+        type: 'confirm',
+        title: 'LOGOUT',
+        message: 'Keluar dari history?',
+        icon: '🔓',
+        confirmText: 'LOGOUT',
+        cancelText: 'BATAL',
+        onConfirm: () => {
+          sessionStorage.removeItem('historyPassword')
+          historyPassword = null
+          playBeep(400, 100)
+          checkHistoryAuth()
+          
+          showAlert({
+            type: 'info',
+            title: 'LOGGED OUT',
+            message: 'Berhasil logout dari history',
+            icon: '👋'
+          })
+        }
+      })
+    })
+  }
+})
 
 // Password Submit
 document.addEventListener('DOMContentLoaded', () => {
@@ -204,7 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
           passwordInput.focus()
         } else if (response.ok) {
           // Correct password
-          localStorage.setItem('historyPassword', password)
+          sessionStorage.setItem('historyPassword', password)
           historyPassword = password
           
           playBeep(800, 100)
@@ -217,6 +251,8 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('passwordModal').style.display = 'none'
             document.getElementById('filterSection').style.display = 'block'
             document.getElementById('historyContainer').style.display = 'block'
+            const logoutBtn = document.getElementById('logoutBtn')
+            if (logoutBtn) logoutBtn.style.display = 'block'
             loadHistory()
           }, 500)
         } else {
@@ -260,7 +296,7 @@ async function loadHistory(status = '') {
     
     if (response.status === 401) {
       // Password expired or invalid
-      localStorage.removeItem('historyPassword')
+      sessionStorage.removeItem('historyPassword')
       historyPassword = null
       checkHistoryAuth()
       return
