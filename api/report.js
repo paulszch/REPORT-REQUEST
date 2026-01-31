@@ -25,10 +25,15 @@ export default async function handler(req, res) {
   await dbConnect();
 
   const form = formidable({
-    multiples: false,
-    maxFileSize: 50 * 1024 * 1024,
-    keepExtensions: true,
-  });
+  multiples: false,
+  maxFileSize: 50 * 1024 * 1024,
+  keepExtensions: true,
+  allowEmptyFiles: true,
+  minFileSize: 0,
+  filter: ({ name, originalFilename, mimetype }) => {
+    return mimetype && (mimetype.startsWith('image/') || mimetype.startsWith('video/'));
+  },
+});
 
   try {
     const [fields, files] = await form.parse(req);
