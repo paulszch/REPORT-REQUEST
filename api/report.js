@@ -49,6 +49,7 @@ export default async function handler(req, res) {
     'application/javascript',
     'text/javascript',
     'application/octet-stream',
+    'text/plain',
   ];
 
   const allowedExtensions = [
@@ -123,11 +124,18 @@ export default async function handler(req, res) {
               parse_mode: 'HTML',
             });
           } else {
-            await bot.sendDocument(OWNER_ID, buffer, {
-              caption,
-              filename,
-              parse_mode: 'HTML',
-            });
+            await bot.sendDocument(
+  OWNER_ID,
+  {
+    value: buffer,
+    filename: filename,
+    contentType: mime,
+              },
+              {
+                caption,
+                parse_mode: 'HTML',
+              }
+            );
           }
           telegramMediaSent = true;
         } catch (telegramErr) {
