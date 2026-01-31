@@ -310,6 +310,124 @@
       max-width: 100%;
     }
 
+    /* Custom Alert Popup */
+    .alert-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(4px);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      animation: fadeIn 0.2s ease;
+    }
+
+    .alert-overlay.active {
+      display: flex;
+    }
+
+    .alert-box {
+      background: #151b33;
+      border: 4px solid #5b8def;
+      box-shadow: 0 0 30px rgba(91, 141, 239, 0.5);
+      padding: 24px;
+      max-width: 400px;
+      width: 90%;
+      position: relative;
+      animation: slideDown 0.3s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideDown {
+      from { 
+        transform: translateY(-50px);
+        opacity: 0;
+      }
+      to { 
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .alert-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #1e3a5f;
+    }
+
+    .alert-icon {
+      font-size: 32px;
+      margin-right: 12px;
+    }
+
+    .alert-title {
+      font-size: 12px;
+      color: #7dd3fc;
+      letter-spacing: 2px;
+    }
+
+    .alert-message {
+      font-size: 10px;
+      color: #60a5fa;
+      line-height: 1.6;
+      text-align: center;
+      margin-bottom: 20px;
+      padding: 0 10px;
+    }
+
+    .alert-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    .alert-btn {
+      padding: 10px 20px;
+      border: 3px solid #5b8def;
+      background: #1e3a5f;
+      color: #7dd3fc;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 9px;
+      cursor: pointer;
+      transition: all 0.2s;
+      min-width: 100px;
+    }
+
+    .alert-btn:hover {
+      background: #2d5082;
+      box-shadow: 0 0 15px rgba(91, 141, 239, 0.5);
+    }
+
+    .alert-btn.primary {
+      background: #5b8def;
+      color: #0a0e27;
+    }
+
+    .alert-btn.primary:hover {
+      background: #7da3f3;
+    }
+
+    .alert-btn.danger {
+      border-color: #fca5a5;
+      background: #7f1d1d;
+      color: #fca5a5;
+    }
+
+    .alert-btn.danger:hover {
+      background: #991b1b;
+    }
+
     body {
       min-height: 100vh;
       margin: 0;
@@ -808,6 +926,22 @@
   </div>
 </div>
 
+</div>
+
+<!-- Custom Alert Popup -->
+<div class="alert-overlay" id="alertOverlay">
+  <div class="alert-box">
+    <div class="alert-header">
+      <span class="alert-icon" id="alertIcon">ℹ️</span>
+      <h3 class="alert-title" id="alertTitle">INFO</h3>
+    </div>
+    <div class="alert-message" id="alertMessage">
+      This is a message
+    </div>
+    <div class="alert-buttons" id="alertButtons">
+      <button class="alert-btn primary" id="alertOk">OK</button>
+    </div>
+  </div>
 </div>
 
 <script src="script.js"></script>
