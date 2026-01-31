@@ -104,7 +104,13 @@ export default async function handler(req, res) {
     if (files.file) {
   const file = Array.isArray(files.file) ? files.file[0] : files.file;
 
-  if (file?.filepath) {
+if (file?.filepath) {
+  console.log('File info:', {
+    originalFilename: file.originalFilename,
+    mimetype: file.mimetype,
+    filepath: file.filepath,
+    size: file.size
+  });
     const mime = file.mimetype || 'application/octet-stream';
 
     fileInfo = {
