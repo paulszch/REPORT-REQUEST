@@ -1,7 +1,14 @@
 {
   "functions": {
-    "api/*.js": {
-      "maxDuration": 10
+    "api/report.js": {
+      "maxDuration": 60,
+      "memory": 1024
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
+  ]
 }
