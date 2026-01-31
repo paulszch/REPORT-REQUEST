@@ -29,24 +29,34 @@ export default async function handler(req, res) {
     multiples: false,
     maxFileSize: 50 * 1024 * 1024,
     keepExtensions: true,
-    allowEmptyFiles: true,
+    allowEmptyFiles: false,
     minFileSize: 0,
     filter: ({ name, originalFilename, mimetype }) => {
       if (name !== 'file') return true;
 
       const allowedMimeTypes = [
+        // Images
         'image/jpeg',
+        'image/jpg',
         'image/png',
         'image/gif',
         'image/webp',
         'image/svg+xml',
         'image/heic',
+        'image/heif',
 
+        // Videos - LENGKAP!
         'video/mp4',
+        'video/mpeg',
         'video/webm',
         'video/quicktime',
         'video/x-msvideo',
+        'video/x-matroska',
+        'video/x-flv',
+        'video/3gpp',
+        'video/ogg',
 
+        // JavaScript/Text
         'application/javascript',
         'text/javascript',
         'application/octet-stream',
@@ -54,23 +64,34 @@ export default async function handler(req, res) {
       ];
 
       const allowedExtensions = [
-        '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.heic',
-        '.mp4', '.webm', '.mov', '.avi',
-        '.js',
+        // Images
+        '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.heic', '.heif',
+        
+        // Videos
+        '.mp4', '.mpeg', '.mpg', '.webm', '.mov', '.avi', '.mkv', '.flv', '.3gp', '.ogv',
+        
+        // Scripts
+        '.js', '.txt',
       ];
 
       const ext = originalFilename
         ? originalFilename.toLowerCase().slice(originalFilename.lastIndexOf('.'))
         : '';
 
-      if (
-        (mimetype && allowedMimeTypes.includes(mimetype)) ||
-        allowedExtensions.includes(ext)
-      ) {
-        return true;
-      }
+      // Accept if either mime type OR extension matches
+      const mimeMatch = mimetype && allowedMimeTypes.includes(mimetype);
+      const extMatch = allowedExtensions.includes(ext);
 
-      return false;
+      console.log('File upload attempt:', {
+        filename: originalFilename,
+        mimetype,
+        extension: ext,
+        mimeMatch,
+        extMatch,
+        accepted: mimeMatch || extMatch
+      });
+
+      return mimeMatch || extMatch;
     },
   });
 
@@ -82,7 +103,6 @@ export default async function handler(req, res) {
     const userid    = fields.userid?.[0]   || '';
     const message   = fields.message?.[0]  || '';
 
-    // Validasi minimal
     if (!name || !userid || !message) {
       return res.status(400).json({
         status: false,
@@ -107,7 +127,7 @@ export default async function handler(req, res) {
       if (file?.filepath) {
         const mime = file.mimetype || 'application/octet-stream';
 
-        console.log('File info:', {
+        console.log('Processing file:', {
           originalFilename: file.originalFilename,
           mimetype: file.mimetype,
           filepath: file.filepath,
@@ -126,17 +146,22 @@ export default async function handler(req, res) {
               { source: fsSync.createReadStream(file.filepath) },
               { caption, parse_mode: 'HTML' }
             );
+            telegramMediaSent = true;
 
           } else if (mime.startsWith('video/')) {
             await bot.telegram.sendVideo(
               OWNER_ID,
-              { source: fsSync.createReadStream(file.filepath) },
+              { 
+                source: fsSync.createReadStream(file.filepath),
+                filename: file.originalFilename,
+              },
               { 
                 caption,
                 supports_streaming: true,
                 parse_mode: 'HTML',
               }
             );
+            telegramMediaSent = true;
 
           } else {
             await bot.telegram.sendDocument(
@@ -150,9 +175,10 @@ export default async function handler(req, res) {
                 parse_mode: 'HTML',
               }
             );
+            telegramMediaSent = true;
           }
 
-          telegramMediaSent = true;
+          console.log('File sent to Telegram successfully');
 
         } catch (err) {
           console.error('Telegram send error:', err);
@@ -161,7 +187,7 @@ export default async function handler(req, res) {
           try {
             await fs.unlink(file.filepath);
           } catch (unlinkErr) {
-            // Ignore error saat hapus file
+            console.error('Error deleting temp file:', unlinkErr);
           }
         }
       }
