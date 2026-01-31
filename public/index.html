@@ -297,6 +297,19 @@
       background: #2d5082;
     }
 
+    /* Password Modal */
+    .password-modal {
+      background: #0f1629;
+      border: 3px solid #5b8def;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 0 20px rgba(91, 141, 239, 0.3);
+    }
+
+    .password-content {
+      max-width: 100%;
+    }
+
     body {
       min-height: 100vh;
       margin: 0;
@@ -724,7 +737,25 @@
   <h1>📜 HISTORY</h1>
   <div class="subtitle">[ RIWAYAT PESAN TERKIRIM ]</div>
   
-  <div style="margin-bottom: 16px;">
+  <!-- Password Modal -->
+  <div class="password-modal" id="passwordModal">
+    <div class="password-content">
+      <h3 style="font-size: 12px; color: #7dd3fc; margin-bottom: 16px; text-align: center;">🔒 AUTHENTICATION</h3>
+      <label style="font-size: 9px; color: #60a5fa; margin-bottom: 6px; display: block;">ENTER PASSWORD</label>
+      <input 
+        type="password" 
+        id="historyPassword" 
+        placeholder="PASSWORD..."
+        style="width: 100%; background: #0f1629; border: 3px solid #1e3a5f; color: #7dd3fc; padding: 10px; font-family: 'Press Start 2P', cursive; font-size: 10px; margin-bottom: 12px;"
+      >
+      <button id="submitPassword" style="width: 100%; padding: 10px; font-size: 10px;">
+        <span class="blink">▸</span> UNLOCK <span class="blink">◂</span>
+      </button>
+      <div id="passwordError" style="color: #fca5a5; font-size: 8px; text-align: center; margin-top: 8px; min-height: 16px;"></div>
+    </div>
+  </div>
+  
+  <div style="margin-bottom: 16px; display: none;" id="filterSection">
     <label style="font-size: 9px; color: #60a5fa; margin-bottom: 6px; display: block;">FILTER STATUS</label>
     <select id="statusFilter" style="width: 100%; background: #0f1629; border: 3px solid #1e3a5f; color: #7dd3fc; padding: 8px; font-family: 'Press Start 2P', cursive; font-size: 8px;">
       <option value="">SEMUA</option>
@@ -734,7 +765,7 @@
     </select>
   </div>
   
-  <div class="history-container" id="historyContainer">
+  <div class="history-container" id="historyContainer" style="display: none;">
     <div class="loading-text">LOADING HISTORY...</div>
   </div>
 </div>
