@@ -150,8 +150,12 @@ export default async function handler(req, res) {
       console.error('Telegram send error:', err);
 
     } finally {
-      await fs.unlink(file.filepath).catch(() => {});
-    }
+  try {
+    await fs.unlink(file.filepath);
+  } catch (unlinkErr) {
+    // Ignore error saat hapus file
+  }
+}
   }
 }
 
