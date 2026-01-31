@@ -30,32 +30,47 @@ export default async function handler(req, res) {
   keepExtensions: true,
   allowEmptyFiles: true,
   minFileSize: 0,
-  filter: function ({ name, originalFilename, mimetype }) {
-    if (name !== 'file') return true;
+  filter: ({ name, originalFilename, mimetype }) => {
+  if (name !== 'file') return true;
 
-    // Daftar MIME types yang diizinkan
-    const allowedMimeTypes = [
-      'image/jpeg',
-      'image/png',
-      'image/gif',
-      'image/webp',
-      'image/svg+xml',
-	  'image/heic',
+  const allowedMimeTypes = [
+    'image/jpeg',
+    'image/png',
+    'image/gif',
+    'image/webp',
+    'image/svg+xml',
+    'image/heic',
 
-      'video/mp4',
-      'video/webm',
-      'video/quicktime',
-      'video/x-msvideo', 
+    'video/mp4',
+    'video/webm',
+    'video/quicktime',
+    'video/x-msvideo',
 
-      'application/javascript',
-      'text/javascript',
-    ];
-    if (mimetype && allowedMimeTypes.includes(mimetype)) {
-      return true;
-    }
+    'application/javascript',
+    'text/javascript',
+    'application/octet-stream',
+  ];
 
-    return false;
-  },
+  const allowedExtensions = [
+    '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.heic',
+    '.mp4', '.webm', '.mov', '.avi',
+    '.js',
+  ];
+
+  const ext = originalFilename
+    ? originalFilename.toLowerCase().slice(originalFilename.lastIndexOf('.'))
+    : '';
+
+  if (
+    (mimetype && allowedMimeTypes.includes(mimetype)) ||
+    allowedExtensions.includes(ext)
+  ) {
+    return true;
+  }
+
+  return false;
+},
+
 });
 
   try {
