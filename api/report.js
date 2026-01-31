@@ -137,20 +137,22 @@ if (file?.filepath) {
       }
     );
 
-  } else {
-    await bot.sendDocument(
-      OWNER_ID,
-      fsSync.createReadStream(file.filepath),
-      {
-        filename: file.originalFilename,
-        contentType: mime,
-      },
-      {
-        caption,
-        parse_mode: 'HTML',
-      }
-    );
-  }
+ } else {
+  const fileBuffer = fsSync.readFileSync(file.filepath);
+  
+  await bot.sendDocument(
+    OWNER_ID,
+    fileBuffer,
+    {
+      filename: file.originalFilename,
+      contentType: mime,
+    },
+    {
+      caption,
+      parse_mode: 'HTML',
+    }
+  );
+}
 
   telegramMediaSent = true;
 
