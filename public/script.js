@@ -43,13 +43,106 @@ navItems.forEach(item => {
       toggleSidebar()
     }
     
-    // Load history if history page
+    // Load history if history page (check authentication first)
     if (targetPage === 'history') {
-      loadHistory()
+      checkHistoryAuth()
     }
     
     playBeep(700, 50)
   })
+})
+
+// History Authentication
+let historyPassword = localStorage.getItem('historyPassword') || null;
+
+function checkHistoryAuth() {
+  if (historyPassword) {
+    // Already authenticated, load history
+    document.getElementById('passwordModal').style.display = 'none'
+    document.getElementById('filterSection').style.display = 'block'
+    document.getElementById('historyContainer').style.display = 'block'
+    loadHistory()
+  } else {
+    // Show password modal
+    document.getElementById('passwordModal').style.display = 'block'
+    document.getElementById('filterSection').style.display = 'none'
+    document.getElementById('historyContainer').style.display = 'none'
+    document.getElementById('historyPassword').focus()
+  }
+}
+
+// Password Submit
+document.addEventListener('DOMContentLoaded', () => {
+  const submitPasswordBtn = document.getElementById('submitPassword')
+  const passwordInput = document.getElementById('historyPassword')
+  const passwordError = document.getElementById('passwordError')
+  
+  if (submitPasswordBtn) {
+    submitPasswordBtn.addEventListener('click', async () => {
+      const password = passwordInput.value.trim()
+      
+      if (!password) {
+        passwordError.textContent = 'PASSWORD REQUIRED!'
+        playBeep(200, 100)
+        return
+      }
+      
+      submitPasswordBtn.disabled = true
+      submitPasswordBtn.innerHTML = '<span class="blink">▸</span> CHECKING... <span class="blink">◂</span>'
+      passwordError.textContent = ''
+      
+      // Test password by making API call
+      try {
+        const response = await fetch('/api/history', {
+          headers: {
+            'x-password': password
+          }
+        })
+        
+        if (response.status === 401) {
+          // Wrong password
+          passwordError.textContent = '❌ WRONG PASSWORD!'
+          playBeep(200, 200)
+          submitPasswordBtn.disabled = false
+          submitPasswordBtn.innerHTML = '<span class="blink">▸</span> UNLOCK <span class="blink">◂</span>'
+          passwordInput.value = ''
+          passwordInput.focus()
+        } else if (response.ok) {
+          // Correct password
+          localStorage.setItem('historyPassword', password)
+          historyPassword = password
+          
+          playBeep(800, 100)
+          setTimeout(() => playBeep(1000, 100), 100)
+          
+          passwordError.textContent = '✓ ACCESS GRANTED!'
+          passwordError.style.color = '#86efac'
+          
+          setTimeout(() => {
+            document.getElementById('passwordModal').style.display = 'none'
+            document.getElementById('filterSection').style.display = 'block'
+            document.getElementById('historyContainer').style.display = 'block'
+            loadHistory()
+          }, 500)
+        } else {
+          throw new Error('Server error')
+        }
+      } catch (error) {
+        console.error('Auth error:', error)
+        passwordError.textContent = '⚠️ CONNECTION ERROR'
+        playBeep(200, 200)
+        submitPasswordBtn.disabled = false
+        submitPasswordBtn.innerHTML = '<span class="blink">▸</span> UNLOCK <span class="blink">◂</span>'
+      }
+    })
+    
+    // Enter key to submit
+    passwordInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        submitPasswordBtn.click()
+      }
+    })
+  }
 })
 
 // Load History Function
@@ -64,7 +157,19 @@ async function loadHistory(status = '') {
       url += `?status=${status}`;
     }
     
-    const response = await fetch(url)
+    const response = await fetch(url, {
+      headers: {
+        'x-password': historyPassword
+      }
+    })
+    
+    if (response.status === 401) {
+      // Password expired or invalid
+      localStorage.removeItem('historyPassword')
+      historyPassword = null
+      checkHistoryAuth()
+      return
+    }
     
     if (!response.ok) {
       throw new Error('Failed to load history')
