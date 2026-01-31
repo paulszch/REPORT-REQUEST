@@ -27,7 +27,7 @@ export default async function handler(req, res) {
 
   const form = formidable({
     multiples: false,
-    maxFileSize: 50 * 1024 * 1024,
+    maxFileSize: 20 * 1024 * 1024, // Kurangi jadi 20MB (Vercel limit)
     keepExtensions: true,
     allowEmptyFiles: false,
     minFileSize: 0,
