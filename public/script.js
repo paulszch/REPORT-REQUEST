@@ -5,6 +5,101 @@ const statusDiv = document.getElementById('status')
 const fileLabel = document.getElementById('fileLabel')
 const form = document.getElementById('formPage')
 
+// Custom Alert System
+const alertOverlay = document.getElementById('alertOverlay')
+const alertIcon = document.getElementById('alertIcon')
+const alertTitle = document.getElementById('alertTitle')
+const alertMessage = document.getElementById('alertMessage')
+const alertButtons = document.getElementById('alertButtons')
+
+function showAlert(options) {
+  const {
+    type = 'info', // info, success, warning, error, confirm
+    title = 'INFO',
+    message = '',
+    icon = 'ℹ️',
+    confirmText = 'OK',
+    cancelText = 'CANCEL',
+    onConfirm = () => {},
+    onCancel = () => {}
+  } = options;
+
+  // Set icon based on type
+  const icons = {
+    info: 'ℹ️',
+    success: '✅',
+    warning: '⚠️',
+    error: '❌',
+    confirm: '❓'
+  };
+
+  alertIcon.textContent = icon || icons[type] || icons.info;
+  alertTitle.textContent = title.toUpperCase();
+  alertMessage.textContent = message.toUpperCase();
+
+  // Clear previous buttons
+  alertButtons.innerHTML = '';
+
+  if (type === 'confirm') {
+    // Confirm dialog with Cancel and OK
+    const cancelBtn = document.createElement('button');
+    cancelBtn.className = 'alert-btn';
+    cancelBtn.textContent = cancelText;
+    cancelBtn.onclick = () => {
+      hideAlert();
+      onCancel();
+      playBeep(400, 50);
+    };
+
+    const confirmBtn = document.createElement('button');
+    confirmBtn.className = 'alert-btn primary';
+    confirmBtn.textContent = confirmText;
+    confirmBtn.onclick = () => {
+      hideAlert();
+      onConfirm();
+      playBeep(800, 50);
+    };
+
+    alertButtons.appendChild(cancelBtn);
+    alertButtons.appendChild(confirmBtn);
+  } else {
+    // Regular alert with just OK
+    const okBtn = document.createElement('button');
+    okBtn.className = `alert-btn ${type === 'error' ? 'danger' : 'primary'}`;
+    okBtn.textContent = confirmText;
+    okBtn.onclick = () => {
+      hideAlert();
+      onConfirm();
+      playBeep(600, 50);
+    };
+
+    alertButtons.appendChild(okBtn);
+  }
+
+  // Show overlay
+  alertOverlay.classList.add('active');
+  
+  // Sound effect
+  if (type === 'success') {
+    playBeep(800, 100);
+  } else if (type === 'error') {
+    playBeep(200, 200);
+  } else {
+    playBeep(600, 100);
+  }
+}
+
+function hideAlert() {
+  alertOverlay.classList.remove('active');
+}
+
+// Close alert when clicking outside
+alertOverlay.addEventListener('click', (e) => {
+  if (e.target === alertOverlay) {
+    hideAlert();
+  }
+});
+
 // Sidebar Navigation
 const sidebar = document.getElementById('sidebar')
 const sidebarToggle = document.getElementById('sidebarToggle')
@@ -370,77 +465,131 @@ form.onsubmit = async (e) => {
   const userid = document.getElementById('userid').value.trim()
   const message = document.getElementById('message').value.trim()
 
-  // Validasi input
+  // Validasi input dengan custom alert
   if (!name) {
-    showStatus('NAMA WAJIB DIISI!', 'error')
+    showAlert({
+      type: 'warning',
+      title: 'WARNING',
+      message: 'Nama wajib diisi!',
+      icon: '⚠️'
+    })
     document.getElementById('name').focus()
     return
   }
 
   if (!userid) {
-    showStatus('USER ID WAJIB DIISI!', 'error')
+    showAlert({
+      type: 'warning',
+      title: 'WARNING',
+      message: 'User ID wajib diisi!',
+      icon: '⚠️'
+    })
     document.getElementById('userid').focus()
     return
   }
 
   if (!message) {
-    showStatus('PESAN WAJIB DIISI!', 'error')
+    showAlert({
+      type: 'warning',
+      title: 'WARNING',
+      message: 'Pesan wajib diisi!',
+      icon: '⚠️'
+    })
     document.getElementById('message').focus()
     return
   }
 
-  btn.disabled = true
-  
-  // Animasi loading retro
-  let loadingDots = 0
-  const loadingText = ['SENDING', 'SENDING.', 'SENDING..', 'SENDING...']
-  const loadingInterval = setInterval(() => {
-    btn.innerHTML = `<span class="blink">▸</span> ${loadingText[loadingDots % 4]} <span class="blink">◂</span>`
-    loadingDots++
-  }, 200)
-  
-  showStatus('MENGIRIM PESAN...', 'info')
-
-  const fd = new FormData(form)
-  
-  try {
-    const res = await fetch('/api/report', {
-      method: 'POST',
-      body: fd
-    })
-
-    const json = await res.json()
-    
-    clearInterval(loadingInterval)
-    
-    if (json.status) {
-      showStatus('✓ PESAN BERHASIL TERKIRIM!', 'success')
+  // Confirmation dialog sebelum kirim
+  showAlert({
+    type: 'confirm',
+    title: 'CONFIRM',
+    message: 'Kirim pesan sekarang?',
+    icon: '📤',
+    confirmText: 'KIRIM',
+    cancelText: 'BATAL',
+    onConfirm: async () => {
+      // Proses pengiriman
+      btn.disabled = true
       
-      // Victory sound
-      playBeep(600, 100)
-      setTimeout(() => playBeep(800, 100), 100)
-      setTimeout(() => playBeep(1000, 200), 200)
+      // Animasi loading retro
+      let loadingDots = 0
+      const loadingText = ['SENDING', 'SENDING.', 'SENDING..', 'SENDING...']
+      const loadingInterval = setInterval(() => {
+        btn.innerHTML = `<span class="blink">▸</span> ${loadingText[loadingDots % 4]} <span class="blink">◂</span>`
+        loadingDots++
+      }, 200)
       
-      setTimeout(() => {
-        form.reset()
-        preview.style.display = 'none'
-        preview.innerHTML = ''
-        fileLabel.innerHTML = '▶ KLIK UNTUK UPLOAD'
+      showStatus('MENGIRIM PESAN...', 'info')
+
+      const fd = new FormData(form)
+      
+      try {
+        const res = await fetch('/api/report', {
+          method: 'POST',
+          body: fd
+        })
+
+        const json = await res.json()
+        
+        clearInterval(loadingInterval)
+        
+        if (json.status) {
+          showStatus('✓ PESAN BERHASIL TERKIRIM!', 'success')
+          
+          // Victory sound
+          playBeep(600, 100)
+          setTimeout(() => playBeep(800, 100), 100)
+          setTimeout(() => playBeep(1000, 200), 200)
+          
+          // Success alert
+          showAlert({
+            type: 'success',
+            title: 'SUCCESS',
+            message: 'Pesan berhasil dikirim ke owner!',
+            icon: '✅',
+            onConfirm: () => {
+              form.reset()
+              preview.style.display = 'none'
+              preview.innerHTML = ''
+              fileLabel.innerHTML = '▶ KLIK UNTUK UPLOAD'
+              btn.disabled = false
+              btn.innerHTML = '<span class="blink">▸</span> KIRIM <span class="blink">◂</span>'
+            }
+          })
+        } else {
+          showStatus('✗ ' + (json.message || 'GAGAL MENGIRIM').toUpperCase(), 'error')
+          
+          showAlert({
+            type: 'error',
+            title: 'ERROR',
+            message: json.message || 'Gagal mengirim pesan',
+            icon: '❌'
+          })
+          
+          btn.disabled = false
+          btn.innerHTML = '<span class="blink">▸</span> KIRIM <span class="blink">◂</span>'
+        }
+      } catch (error) {
+        clearInterval(loadingInterval)
+        console.error('Fetch error:', error)
+        showStatus('✗ GAGAL TERHUBUNG KE SERVER', 'error')
+        
+        showAlert({
+          type: 'error',
+          title: 'CONNECTION ERROR',
+          message: 'Gagal terhubung ke server. Coba lagi nanti.',
+          icon: '🔌'
+        })
+        
         btn.disabled = false
         btn.innerHTML = '<span class="blink">▸</span> KIRIM <span class="blink">◂</span>'
-      }, 2000)
-    } else {
-      showStatus('✗ ' + (json.message || 'GAGAL MENGIRIM').toUpperCase(), 'error')
-      btn.disabled = false
-      btn.innerHTML = '<span class="blink">▸</span> KIRIM <span class="blink">◂</span>'
+      }
+    },
+    onCancel: () => {
+      // User cancelled
+      showStatus('', '')
     }
-  } catch (error) {
-    clearInterval(loadingInterval)
-    console.error('Fetch error:', error)
-    showStatus('✗ GAGAL TERHUBUNG KE SERVER', 'error')
-    btn.disabled = false
-    btn.innerHTML = '<span class="blink">▸</span> KIRIM <span class="blink">◂</span>'
-  }
+  })
 }
 
 // Tambah validasi real-time dengan sound
